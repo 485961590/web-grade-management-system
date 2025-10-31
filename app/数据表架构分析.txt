@@ -1,0 +1,113 @@
+# 数据库表依赖关系图
+
+users (基表)
+├── students (依赖 users)
+├── teachers (依赖 users) 
+├── admins (依赖 users)
+└── grade_modification_logs (依赖 users)
+
+classes (独立表)
+├── students (依赖 classes)
+└── teachers (依赖 classes，通过 class_teacher_id)
+
+courses (独立表)
+├── grades (依赖 courses)
+└── teachers (多对多，通过 teacher_course)
+
+grades (核心业务表，依赖多个表)
+├── students (依赖)
+├── courses (依赖) 
+├── teachers (依赖)
+└── grade_modification_logs (依赖 grades)
+
+teacher_course (多对多关联表)
+├── teachers (依赖)
+└── courses (依赖)
+
+
+# 详细建表依赖分析
+
+## 1. users 表（基础用户表）
+CREATE TABLE users (
+    id, username, password_hash, role, email, phone, created_at, type
+);
+依赖：无（最基础的表）
+设计原因：所有用户的公共信息，支持单点登录和统一认证
+
+## 2. students 表（学生表）
+CREATE TABLE students (
+    id REFERENCES users(id),           -- 依赖 users
+    student_id, class_id REFERENCES classes(id), major
+);
+users 表（继承关系）
+classes 表（班级归属）
+设计原因：扩展用户信息，添加学生特有属性
+
+## 3. teachers 表（教师表）
+CREATE TABLE teachers (
+    id REFERENCES users(id),           -- 依赖 users
+    teacher_id, department, title
+);
+依赖：users 表（继承关系）
+设计原因：扩展用户信息，添加教师特有属性
+
+## 4. admins 表（管理员表）
+CREATE TABLE admins (
+    id REFERENCES users(id),           -- 依赖 users
+    admin_id
+);
+依赖：users 表（继承关系）
+设计原因：扩展用户信息，添加管理员标识
+
+## 5. classes 表（班级表）
+CREATE TABLE classes (
+    id, class_code, class_name, major, 
+    class_teacher_id REFERENCES teachers(id)  -- 依赖 teachers
+);
+依赖：teachers 表（班主任关系）
+设计原因：组织结构管理，支持班级-学生-班主任关系
+
+## 6. courses 表（课程表）
+CREATE TABLE courses (
+    id, course_code, course_name, credits, hours, description
+);
+依赖：无（基础数据表）
+设计原因：课程基本信息，教学计划核心数据
+
+## 7. grades 表（成绩表） - 核心业务表
+CREATE TABLE grades (
+    id,
+    student_id REFERENCES students(id),    -- 依赖 students
+    course_id REFERENCES courses(id),      -- 依赖 courses  
+    teacher_id REFERENCES teachers(id),    -- 依赖 teachers
+    score, semester, academic_year, is_makeup, is_locked, created_at, updated_at
+);
+依赖：
+students 表（谁的成绩）
+courses 表（什么课程）
+teachers 表（谁录入的）
+设计原因：核心业务数据，连接学生-课程-教师三角关系
+
+## 8. teacher_course 表（教师课程关联表）
+CREATE TABLE teacher_course (
+    teacher_id REFERENCES teachers(id),    -- 依赖 teachers
+    course_id REFERENCES courses(id),      -- 依赖 courses
+    assigned_at
+);
+依赖：
+teachers 表
+courses 表
+设计原因：支持多对多关系，一个教师教多门课，一门课多个教师
+
+## 9. grade_modification_logs 表（成绩修改日志）
+CREATE TABLE grade_modification_logs (
+    id,
+    grade_id REFERENCES grades(id),        -- 依赖 grades
+    modified_by REFERENCES users(id),      -- 依赖 users
+    previous_score, new_score, reason, modified_at
+);
+依赖：
+grades 表（记录哪个成绩被修改）
+users 表（记录谁修改的）
+设计原因：审计追踪，满足安全合规要求
+
