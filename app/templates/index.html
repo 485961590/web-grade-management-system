@@ -1,0 +1,26 @@
+<!-- app/templates/index.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h2>欢迎使用成绩管理系统</h2>
+<p>当前用户: {{ current_user.username }}</p>
+<p>用户角色: {{ current_user.role.value }}</p>
+
+{% if current_user.role.value == 'admin' %}
+    <h3>管理员功能</h3>
+    <p>• 管理用户账户</p>
+    <p>• 管理课程信息</p>
+    <p>• 管理全部成绩</p>
+{% elif current_user.role.value == 'teacher' %}
+    <h3>教师功能</h3>
+    <p>• 录入课程成绩</p>
+    <p>• 查询所授课程成绩</p>
+{% elif current_user.role.value == 'student' %}
+    <h3>学生功能</h3>
+    <p>• 查询个人成绩</p>
+{% elif current_user.role.value == 'class_teacher' %}
+    <h3>班主任功能</h3>
+    <p>• 查询班级成绩</p>
+    <p>• 查看成绩统计</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,28 @@
+<!-- app/templates/profile.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h2>个人信息</h2>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        <label>用户名</label><br>
+        <input type="text" value="{{ current_user.username }}" disabled>
+    </div>
+    <div class="form-group">
+        <label>角色</label><br>
+        <input type="text" value="{{ current_user.role.value }}" disabled>
+    </div>
+    <div class="form-group">
+        {{ form.email.label }}<br>
+        {{ form.email(value=current_user.email or '') }}
+    </div>
+    <div class="form-group">
+        {{ form.phone.label }}<br>
+        {{ form.phone(value=current_user.phone or '') }}
+    </div>
+    <div class="form-group">
+        {{ form.submit() }}
+    </div>
+</form>
+{% endblock %}

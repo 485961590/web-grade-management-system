@@ -1,0 +1,7 @@
+# 进入你的本地仓库目录
+cd /path/to/your/local/repo
+
+# 执行覆盖操作
+git fetch --all
+git reset --hard origin/main
+git clean -fd
