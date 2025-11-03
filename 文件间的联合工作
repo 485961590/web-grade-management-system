@@ -1,0 +1,21 @@
+用户访问登录页(login) →     填写表单  →  提交验证  →  登录成功  →  跳转首页
+    ↓                      ↓         ↓           ↓          ↓
+  auth.py                forms.py   auth.py   models.py    auth.py
+                         login.html           Flask-Login
+
+🔄 完整数据流总结
+步骤	用户操作	涉及文件	关键代码
+1	访问登录页	auth.py + login.html	form = LoginForm()
+2	填写表单	forms.py	定义字段和验证规则
+3	点击提交	auth.py	form.validate_on_submit()
+4	验证用户	models.py	user.check_password()
+5	创建会话	Flask-Login	login_user(user)
+6	跳转首页	auth.py	redirect(url_for('auth.index'))
+
+
+💡 核心要点
+forms.py = 定义"数据长什么样"
+models.py = 定义"数据怎么存和验证"
+auth.py = 定义"登录业务逻辑"
+login.html = 定义"登录页面长什么样"
+__init__.py = 定义"整个应用怎么配置"

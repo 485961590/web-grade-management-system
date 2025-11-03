@@ -12,5 +12,7 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     # 密码加密轮数
     BCRYPT_ROUNDS = 12
+
+
 # 创建配置实例
 config = Config()

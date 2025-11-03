@@ -34,10 +34,10 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True, nullable=False, index=True)
+    username = db.Column(db.String(64), unique=True, nullable=False, index=True)  # 访问不需要接value
     # index=True: 创建数据库索引，加速基于用户名的查询
     password_hash = db.Column(db.String(128), nullable=False)
-    role = db.Column(db.Enum(RoleType), nullable=False)
+    role = db.Column(db.Enum(RoleType), nullable=False)  # 访问role需要接value,因为role 是枚举字段。
     # db.Enum(RoleType): 枚举类型字段，只能存储预定义的角色值
     # nullable=False: 每个用户必须分配一个角色
     email = db.Column(db.String(120))
