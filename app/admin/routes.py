@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import or_
 
 from app.models import db, Course, Teacher, Student, Class, User, RoleType, Grade
-from app.admin.forms import CourseForm, TeacherForm, StudentForm, TeacherCourseForm, ClassForm
+from app.admin.forms import CourseForm, TeacherForm, StudentForm, TeacherCourseForm, ClassForm, GradeForm
 from app.admin.decorators import admin_required
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -636,3 +636,249 @@ def class_delete(class_id):
 
     flash(f'班级 "{class_.class_name}" 已删除', 'success')
     return redirect(url_for('admin.class_list'))
+
+
+# ==================== 成绩管理 ====================
+
+@bp.route('/grades')
+@login_required
+@admin_required
+def grade_list():
+    """成绩列表"""
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+    student_search = request.args.get('student_search', '')
+    course_search = request.args.get('course_search', '')
+    semester_filter = request.args.get('semester_filter', '')
+    teacher_filter = request.args.get('teacher_filter', type=int)
+
+    query = Grade.query
+
+    # 学生搜索
+    if student_search:
+        query = query.join(Student).filter(
+            db.or_(
+                Student.username.ilike(f'%{student_search}%'),
+                Student.student_id.ilike(f'%{student_search}%')
+            )
+        )
+
+    # 课程搜索
+    if course_search:
+        query = query.join(Course).filter(
+            db.or_(
+                Course.course_name.ilike(f'%{course_search}%'),
+                Course.course_code.ilike(f'%{course_search}%')
+            )
+        )
+
+    # 学期筛选
+    if semester_filter:
+        query = query.filter(Grade.semester == semester_filter)
+
+    # 教师筛选
+    if teacher_filter:
+        query = query.filter(Grade.teacher_id == teacher_filter)
+
+    grades = query.order_by(Grade.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+
+    # 获取教师列表用于筛选
+    teachers = Teacher.query.order_by(Teacher.username).all()
+
+    return render_template('admin/grades/list.html',
+                           grades=grades,
+                           teachers=teachers,
+                           student_search=student_search,
+                           course_search=course_search,
+                           semester_filter=semester_filter,
+                           teacher_filter=teacher_filter)
+
+
+@bp.route('/grades/create', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def grade_create():
+    """录入成绩"""
+    form = GradeForm()
+
+    # 检查是否有教师数据
+    teacher_count = Teacher.query.count()
+    if teacher_count == 0:
+        flash('请先创建教师账户才能录入成绩', 'error')
+        return redirect(url_for('admin.teacher_create'))
+
+    if form.validate_on_submit():
+        # 检查是否已存在相同学生、课程、学期的成绩记录
+        existing_grade = Grade.query.filter_by(
+            student_id=form.student_id.data,
+            course_id=form.course_id.data,
+            semester=form.semester.data,
+            is_makeup=form.is_makeup.data
+        ).first()
+
+        if existing_grade:
+            flash('该学生在此课程和学期下已有成绩记录', 'error')
+            return render_template('admin/grades/create.html', form=form)
+
+        grade = Grade(
+            student_id=form.student_id.data,
+            course_id=form.course_id.data,
+            teacher_id=form.teacher_id.data,
+            score=form.score.data,
+            semester=form.semester.data,
+            academic_year=form.academic_year.data,
+            is_makeup=form.is_makeup.data
+        )
+
+        db.session.add(grade)
+        db.session.commit()
+
+        flash('成绩录入成功', 'success')
+        return redirect(url_for('admin.grade_list'))
+
+    return render_template('admin/grades/create.html', form=form)
+
+
+@bp.route('/grades/<int:grade_id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def grade_edit(grade_id):
+    """编辑成绩"""
+    grade = Grade.query.get_or_404(grade_id)
+    form = GradeForm(obj=grade)
+
+    if form.validate_on_submit():
+        # 检查是否与其他成绩记录冲突（排除当前记录）
+        existing_grade = Grade.query.filter(
+            Grade.student_id == form.student_id.data,
+            Grade.course_id == form.course_id.data,
+            Grade.semester == form.semester.data,
+            Grade.is_makeup == form.is_makeup.data,
+            Grade.id != grade_id
+        ).first()
+
+        if existing_grade:
+            flash('该学生在此课程和学期下已有其他成绩记录', 'error')
+            return render_template('admin/grades/edit.html', form=form, grade=grade)
+
+        # 记录修改前的成绩
+        previous_score = grade.score
+
+        grade.student_id = form.student_id.data
+        grade.course_id = form.course_id.data
+        grade.score = form.score.data
+        grade.semester = form.semester.data
+        grade.academic_year = form.academic_year.data
+        grade.is_makeup = form.is_makeup.data
+
+        # 创建成绩修改日志
+        if previous_score != form.score.data:
+            modification_log = GradeModificationLog(
+                grade_id=grade.id,
+                previous_score=previous_score,
+                new_score=form.score.data,
+                modified_by=current_user.id,
+                reason=f"管理员 {current_user.username} 修改成绩"
+            )
+            db.session.add(modification_log)
+
+        db.session.commit()
+        flash('成绩更新成功', 'success')
+        return redirect(url_for('admin.grade_list'))
+
+    return render_template('admin/grades/edit.html', form=form, grade=grade)
+
+
+@bp.route('/grades/<int:grade_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def grade_delete(grade_id):
+    """删除成绩"""
+    grade = Grade.query.get_or_404(grade_id)
+
+    # 删除相关的修改日志
+    GradeModificationLog.query.filter_by(grade_id=grade_id).delete()
+
+    db.session.delete(grade)
+    db.session.commit()
+
+    flash('成绩记录已删除', 'success')
+    return redirect(url_for('admin.grade_list'))
+
+
+@bp.route('/grades/<int:grade_id>/lock', methods=['POST'])
+@login_required
+@admin_required
+def grade_lock(grade_id):
+    """锁定成绩（防止修改）"""
+    grade = Grade.query.get_or_404(grade_id)
+    grade.is_locked = True
+    db.session.commit()
+    flash('成绩已锁定', 'success')
+    return redirect(url_for('admin.grade_list'))
+
+
+@bp.route('/grades/<int:grade_id>/unlock', methods=['POST'])
+@login_required
+@admin_required
+def grade_unlock(grade_id):
+    """解锁成绩"""
+    grade = Grade.query.get_or_404(grade_id)
+    grade.is_locked = False
+    db.session.commit()
+    flash('成绩已解锁', 'success')
+    return redirect(url_for('admin.grade_list'))
+
+
+@bp.route('/grades/import', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def grade_import():
+    """批量导入成绩"""
+    if request.method == 'POST':
+        # 这里可以实现Excel或CSV文件导入功能
+        flash('批量导入功能开发中', 'info')
+        return redirect(url_for('admin.grade_list'))
+
+    return render_template('admin/grades/import.html')
+
+
+@bp.route('/grades/statistics')
+@login_required
+@admin_required
+def grade_statistics():
+    """成绩统计"""
+    # 基础统计
+    total_grades = Grade.query.count()
+    avg_score = db.session.query(db.func.avg(Grade.score)).scalar() or 0
+    max_score = db.session.query(db.func.max(Grade.score)).scalar() or 0
+    min_score = db.session.query(db.func.min(Grade.score)).scalar() or 0
+
+    # 成绩分布统计
+    score_distribution = {
+        '优秀(90-100)': Grade.query.filter(Grade.score.between(90, 100)).count(),
+        '良好(80-89)': Grade.query.filter(Grade.score.between(80, 89)).count(),
+        '中等(70-79)': Grade.query.filter(Grade.score.between(70, 79)).count(),
+        '及格(60-69)': Grade.query.filter(Grade.score.between(60, 69)).count(),
+        '不及格(0-59)': Grade.query.filter(Grade.score.between(0, 59)).count()
+    }
+
+    # 各课程平均分
+    course_stats = db.session.query(
+        Course.course_name,
+        db.func.avg(Grade.score).label('avg_score'),
+        db.func.count(Grade.id).label('count')
+    ).join(Grade.course).group_by(Course.id).all()
+
+    stats = {
+        'total_grades': total_grades,
+        'avg_score': round(avg_score, 2),
+        'max_score': max_score,
+        'min_score': min_score,
+        'score_distribution': score_distribution,
+        'course_stats': course_stats
+    }
+
+    return render_template('admin/grades/statistics.html', stats=stats)

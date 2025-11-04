@@ -1,0 +1,220 @@
+{% extends "admin/base.html" %}
+
+{% block title %}成绩管理 - 成绩管理系统{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">成绩管理</h1>
+    <div>
+        <a href="{{ url_for('admin.grade_create') }}" class="action-btn" style="margin-right: 10px;">
+            录入成绩
+        </a>
+        <a href="{{ url_for('admin.grade_import') }}" class="action-btn" style="margin-right: 10px;">
+            批量导入
+        </a>
+        <a href="{{ url_for('admin.grade_statistics') }}" class="action-btn">
+            成绩统计
+        </a>
+    </div>
+</div>
+
+<!-- 搜索和筛选区域 -->
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+    <form method="GET" action="{{ url_for('admin.grade_list') }}"
+          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+
+        <div>
+            <input type="text" name="student_search" placeholder="学生姓名/学号"
+                   value="{{ student_search }}"
+                   style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+
+        <div>
+            <input type="text" name="course_search" placeholder="课程名称/代码"
+                   value="{{ course_search }}"
+                   style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+
+        <div>
+            <select name="semester_filter"
+                    style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <option value="">所有学期</option>
+                <option value="2024-2025-1" {% if semester_filter==
+                '2024-2025-1' %}selected{% endif %}>2024-2025-1</option>
+                <option value="2024-2025-2" {% if semester_filter==
+                '2024-2025-2' %}selected{% endif %}>2024-2025-2</option>
+                <option value="2023-2024-1" {% if semester_filter==
+                '2023-2024-1' %}selected{% endif %}>2023-2024-1</option>
+                <option value="2023-2024-2" {% if semester_filter==
+                '2023-2024-2' %}selected{% endif %}>2023-2024-2</option>
+            </select>
+        </div>
+
+        <div>
+            <select name="teacher_filter"
+                    style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <option value="">所有教师</option>
+                {% for teacher in teachers %}
+                <option value="{{ teacher.id }}" {% if teacher_filter== teacher.id %}selected{% endif %}>
+                    {{ teacher.username }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="submit"
+                    style="padding: 8px 16px; background: #1890ff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                搜索
+            </button>
+            {% if student_search or course_search or semester_filter or teacher_filter %}
+            <a href="{{ url_for('admin.grade_list') }}"
+               style="padding: 8px 16px; background: #f5f5f5; color: #333; text-decoration: none; border-radius: 4px;">
+                重置
+            </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- 成绩列表 -->
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    {% if grades.items %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th>学生</th>
+            <th>课程</th>
+            <th>成绩</th>
+            <th>学期</th>
+            <th>录入教师</th>
+            <th>状态</th>
+            <th>录入时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for grade in grades.items %}
+        <tr>
+            <td>
+                <div><strong>{{ grade.student.username }}</strong></div>
+                <div style="font-size: 12px; color: #666;">{{ grade.student.student_id }}</div>
+            </td>
+            <td>
+                <div><strong>{{ grade.course.course_name }}</strong></div>
+                <div style="font-size: 12px; color: #666;">{{ grade.course.course_code }}</div>
+            </td>
+            <td>
+                <span class="badge {% if grade.score >= 90 %}badge-success
+                                  {% elif grade.score >= 80 %}badge-info
+                                  {% elif grade.score >= 70 %}badge-warning
+                                  {% elif grade.score >= 60 %}badge-primary
+                                  {% else %}badge-danger{% endif %}">
+                    {{ grade.score }}
+                    {% if grade.is_makeup %}
+                    <span style="font-size: 10px;">(补)</span>
+                    {% endif %}
+                </span>
+            </td>
+            <td>{{ grade.semester }}</td>
+            <td>{{ grade.teacher.username }}</td>
+            <td>
+                {% if grade.is_locked %}
+                <span class="badge badge-secondary">已锁定</span>
+                {% else %}
+                <span class="badge badge-success">可编辑</span>
+                {% endif %}
+            </td>
+            <td>{{ grade.created_at.strftime('%Y-%m-%d') }}</td>
+            <td>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <a href="{{ url_for('admin.grade_edit', grade_id=grade.id) }}"
+                       style="color: #1890ff; text-decoration: none; font-size: 12px;"
+                       {% if grade.is_locked %}onclick="alert('成绩已锁定，无法编辑'); return false;" {% endif %}>
+                        编辑
+                    </a>
+                    {% if grade.is_locked %}
+                    <form method="POST" action="{{ url_for('admin.grade_unlock', grade_id=grade.id) }}"
+                          style="display: inline;">
+                        <button type="submit"
+                                style="color: #52c41a; background: none; border: none; cursor: pointer; font-size: 12px;">
+                            解锁
+                        </button>
+                    </form>
+                    {% else %}
+                    <form method="POST" action="{{ url_for('admin.grade_lock', grade_id=grade.id) }}"
+                          style="display: inline;">
+                        <button type="submit"
+                                style="color: #faad14; background: none; border: none; cursor: pointer; font-size: 12px;">
+                            锁定
+                        </button>
+                    </form>
+                    {% endif %}
+                    <form method="POST" action="{{ url_for('admin.grade_delete', grade_id=grade.id) }}"
+                          style="display: inline;"
+                          onsubmit="return confirm('确定要删除这条成绩记录吗？此操作不可恢复！');">
+                        <button type="submit"
+                                style="color: #ff4d4f; background: none; border: none; cursor: pointer; font-size: 12px;">
+                            🗑️ 删除
+                        </button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- 分页 -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+        <div style="color: #666; font-size: 14px;">
+            显示第 {{ (grades.page - 1) * grades.per_page + 1 }} -
+            {{ [grades.page * grades.per_page, grades.total]|min }} 条，共 {{ grades.total }} 条记录
+        </div>
+
+        <div style="display: flex; gap: 5px;">
+            {% if grades.has_prev %}
+            <a href="{{ url_for('admin.grade_list', page=grades.prev_num, student_search=student_search, course_search=course_search, semester_filter=semester_filter, teacher_filter=teacher_filter) }}"
+               style="padding: 8px 12px; color: #1890ff; text-decoration: none; border: 1px solid #ddd; border-radius: 4px;">
+                ← 上一页
+            </a>
+            {% endif %}
+
+            {% for page_num in grades.iter_pages(left_edge=2, left_current=2, right_current=2, right_edge=2) %}
+            {% if page_num %}
+            {% if page_num == grades.page %}
+            <span style="padding: 8px 12px; background: #1890ff; color: white; border-radius: 4px;">{{ page_num }}</span>
+            {% else %}
+            <a href="{{ url_for('admin.grade_list', page=page_num, student_search=student_search, course_search=course_search, semester_filter=semester_filter, teacher_filter=teacher_filter) }}"
+               style="padding: 8px 12px; color: #1890ff; text-decoration: none; border: 1px solid #ddd; border-radius: 4px;">{{
+                page_num }}</a>
+            {% endif %}
+            {% else %}
+            <span style="padding: 8px 12px; color: #999;">...</span>
+            {% endif %}
+            {% endfor %}
+
+            {% if grades.has_next %}
+            <a href="{{ url_for('admin.grade_list', page=grades.next_num, student_search=student_search, course_search=course_search, semester_filter=semester_filter, teacher_filter=teacher_filter) }}"
+               style="padding: 8px 12px; color: #1890ff; text-decoration: none; border: 1px solid #ddd; border-radius: 4px;">
+                下一页 →
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 60px 20px; color: #999;">
+        {% if student_search or course_search or semester_filter or teacher_filter %}
+        <div style="font-size: 48px; margin-bottom: 20px;">🔍</div>
+        <h3 style="margin: 0 0 10px 0; color: #666;">没有找到匹配的成绩记录</h3>
+        <p>请尝试使用其他条件搜索，或 <a href="{{ url_for('admin.grade_list') }}"
+                                        style="color: #1890ff;">查看所有成绩</a></p>
+        {% else %}
+        <div style="font-size: 48px; margin-bottom: 20px;">📊</div>
+        <h3 style="margin: 0 0 10px 0; color: #666;">暂无成绩数据</h3>
+        <p><a href="{{ url_for('admin.grade_create') }}" style="color: #1890ff;">点击录入第一条成绩</a></p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

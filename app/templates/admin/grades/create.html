@@ -1,0 +1,110 @@
+{% extends "admin/base.html" %}
+
+{% block title %}录入成绩 - 成绩管理系统{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">录入成绩</h1>
+    <a href="{{ url_for('admin.grade_list') }}" style="color: #1890ff; text-decoration: none;">返回列表</a>
+</div>
+
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 600px;">
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.student_id.label }}</label>
+            {{ form.student_id(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+            {% if form.student_id.errors %}
+            <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                {% for error in form.student_id.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.course_id.label }}</label>
+            {{ form.course_id(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+            {% if form.course_id.errors %}
+            <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                {% for error in form.course_id.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.teacher_id.label }}</label>
+            {{ form.teacher_id(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+            {% if form.teacher_id.errors %}
+            <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                {% for error in form.teacher_id.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.score.label }}</label>
+                {{ form.score(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;",
+                placeholder="0-100") }}
+                {% if form.score.errors %}
+                <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                    {% for error in form.score.errors %}
+                    {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.semester.label }}</label>
+                {{ form.semester(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.academic_year.label
+                    }}</label>
+                {{ form.academic_year(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+            </div>
+
+            <div style="display: flex; align-items: center; margin-top: 25px;">
+                {{ form.is_makeup(style="margin-right: 8px;") }}
+                <label style="font-weight: bold; margin: 0;">{{ form.is_makeup.label }}</label>
+            </div>
+        </div>
+
+        <!-- 成绩等级说明 -->
+        <div style="background: #f6ffed; padding: 10px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #b7eb8f;">
+            <div style="font-size: 14px; color: #389e0d;">
+                <strong>成绩等级说明：</strong>
+                <div style="display: flex; gap: 15px; margin-top: 5px; font-size: 12px;">
+                    <span>90-100: 优秀</span>
+                    <span>80-89: 良好</span>
+                    <span>70-79: 中等</span>
+                    <span>60-69: 及格</span>
+                    <span>0-59: 不及格</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="submit"
+                    style="padding: 10px 20px; background: #1890ff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                保存成绩
+            </button>
+            <a href="{{ url_for('admin.grade_list') }}"
+               style="padding: 10px 20px; background: #f5f5f5; color: #333; text-decoration: none; border-radius: 4px;">
+                取消
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

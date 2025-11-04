@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, IntegerField, TextAreaField, SelectField, SelectMultipleField
+from wtforms import StringField, SubmitField, IntegerField, TextAreaField, SelectField, SelectMultipleField, \
+    BooleanField
 from wtforms.validators import DataRequired, Length, NumberRange, Optional
-from app.models import Class, Course, Teacher
+from app.models import Class, Course, Teacher, Student
 
 
 class CourseForm(FlaskForm):
@@ -67,3 +68,49 @@ class ClassForm(FlaskForm):
         # 动态加载教师选项
         self.class_teacher_id.choices = [(0, '未分配')] + [(t.id, f"{t.username} ({t.teacher_id})")
                                                            for t in Teacher.query.order_by(Teacher.username).all()]
+
+
+class GradeForm(FlaskForm):
+    """成绩信息表单"""
+    student_id = SelectField('学生', coerce=int, validators=[DataRequired()])
+    course_id = SelectField('课程', coerce=int, validators=[DataRequired()])
+    teacher_id = SelectField('授课教师', coerce=int, validators=[DataRequired()])
+    score = IntegerField('成绩', validators=[DataRequired(), NumberRange(min=0, max=100)])
+    semester = SelectField('学期', choices=[
+        ('2024-2025-1', '2024-2025学年第一学期'),
+        ('2024-2025-2', '2024-2025学年第二学期'),
+        ('2023-2024-1', '2023-2024学年第一学期'),
+        ('2023-2024-2', '2023-2024学年第二学期'),
+        ('2022-2023-1', '2022-2023学年第一学期'),
+        ('2022-2023-2', '2022-2023学年第二学期')
+    ], validators=[DataRequired()])
+    academic_year = StringField('学年', validators=[DataRequired(), Length(max=10)],
+                                default='2024-2025')
+    is_makeup = BooleanField('补考成绩')
+    submit = SubmitField('保存')
+
+    def __init__(self, *args, **kwargs):
+        super(GradeForm, self).__init__(*args, **kwargs)
+        # 动态加载学生选项
+        self.student_id.choices = [(s.id, f"{s.username} ({s.student_id})")
+                                   for s in Student.query.order_by(Student.student_id).all()]
+        # 动态加载课程选项
+        self.course_id.choices = [(c.id, f"{c.course_code} - {c.course_name}")
+                                  for c in Course.query.order_by(Course.course_code).all()]
+        # 动态加载教师选项
+        self.teacher_id.choices = [(t.id, f"{t.username} ({t.teacher_id})")
+                                   for t in Teacher.query.order_by(Teacher.username).all()]
+
+
+class GradeSearchForm(FlaskForm):
+    """成绩搜索表单"""
+    student_search = StringField('学生姓名/学号', validators=[Optional()])
+    course_search = StringField('课程名称/代码', validators=[Optional()])
+    semester_filter = SelectField('学期', choices=[
+        ('', '所有学期'),
+        ('2024-2025-1', '2024-2025学年第一学期'),
+        ('2024-2025-2', '2024-2025学年第二学期'),
+        ('2023-2024-1', '2023-2024学年第一学期'),
+        ('2023-2024-2', '2023-2024学年第二学期')
+    ], validators=[Optional()])
+    submit = SubmitField('搜索')

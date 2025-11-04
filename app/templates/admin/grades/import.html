@@ -1,0 +1,84 @@
+{% extends "admin/base.html" %}
+
+{% block title %}批量导入成绩 - 成绩管理系统{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">批量导入成绩</h1>
+    <a href="{{ url_for('admin.grade_list') }}" style="color: #1890ff; text-decoration: none;">返回列表</a>
+</div>
+
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 800px;">
+    <div style="background: #e6f7ff; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #1890ff;">
+        <h4 style="margin: 0 0 10px 0; color: #1890ff;">导入说明</h4>
+        <ul style="margin: 0; padding-left: 20px; color: #666;">
+            <li>支持 Excel (.xlsx, .xls) 和 CSV 文件格式</li>
+            <li>文件必须包含以下列：学号、课程代码、成绩、学期</li>
+            <li>学期格式：YYYY-YYYY-1 或 YYYY-YYYY-2（如：2024-2025-1）</li>
+            <li>成绩范围为 0-100 的整数</li>
+        </ul>
+    </div>
+
+    <!-- 文件上传区域 -->
+    <div style="border: 2px dashed #d9d9d9; padding: 40px; text-align: center; border-radius: 8px; margin-bottom: 20px;">
+        <div style="font-size: 48px; margin-bottom: 15px;">📤</div>
+        <h3 style="margin: 0 0 10px 0; color: #666;">拖拽文件到此处或点击上传</h3>
+        <p style="color: #999; margin: 0 0 20px 0;">支持 .xlsx, .xls, .csv 格式</p>
+        <button style="padding: 10px 20px; background: #1890ff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            选择文件
+        </button>
+    </div>
+
+    <!-- 模板下载 -->
+    <div style="background: #f6ffed; padding: 15px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #b7eb8f;">
+        <h4 style="margin: 0 0 10px 0; color: #389e0d;">下载模板</h4>
+        <p style="margin: 0 0 15px 0; color: #666;">使用标准模板可以确保数据格式正确</p>
+        <a href="#"
+           style="padding: 8px 16px; background: #52c41a; color: white; text-decoration: none; border-radius: 4px; display: inline-block;">
+            📥 下载Excel模板
+        </a>
+        <a href="#"
+           style="padding: 8px 16px; background: #13c2c2; color: white; text-decoration: none; border-radius: 4px; display: inline-block; margin-left: 10px;">
+            📥 下载CSV模板
+        </a>
+    </div>
+
+    <!-- 数据预览（上传后显示） -->
+    <div style="display: none;" id="preview-section">
+        <h3 style="margin: 0 0 15px 0; color: #333;">数据预览</h3>
+        <div style="border: 1px solid #f0f0f0; border-radius: 4px; overflow: hidden;">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>学号</th>
+                    <th>课程代码</th>
+                    <th>成绩</th>
+                    <th>学期</th>
+                    <th>状态</th>
+                </tr>
+                </thead>
+                <tbody id="preview-data">
+                <!-- 预览数据将通过JavaScript动态填充 -->
+                </tbody>
+            </table>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button style="padding: 10px 20px; background: #1890ff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                确认导入
+            </button>
+            <button style="padding: 10px 20px; background: #f5f5f5; color: #333; border: none; border-radius: 4px; cursor: pointer;">
+                重新选择
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 简单的JavaScript用于文件上传交互 -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 这里可以添加文件上传的JavaScript逻辑
+        console.log('批量导入页面加载完成');
+    });
+</script>
+{% endblock %}

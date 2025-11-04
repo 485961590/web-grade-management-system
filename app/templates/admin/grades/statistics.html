@@ -1,0 +1,108 @@
+{% extends "admin/base.html" %}
+
+{% block title %}成绩统计 - 成绩管理系统{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">成绩统计分析</h1>
+    <a href="{{ url_for('admin.grade_list') }}" style="color: #1890ff; text-decoration: none;">返回列表</a>
+</div>
+
+<!-- 总体统计 -->
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+    <h3 style="margin: 0 0 20px 0; color: #333;">总体统计</h3>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+        <div style="text-align: center; padding: 20px; background: #e6f7ff; border-radius: 8px;">
+            <div style="font-size: 32px; font-weight: bold; color: #1890ff;">{{ stats.total_grades }}</div>
+            <div style="color: #666;">总成绩数</div>
+        </div>
+
+        <div style="text-align: center; padding: 20px; background: #f6ffed; border-radius: 8px;">
+            <div style="font-size: 32px; font-weight: bold; color: #52c41a;">{{ stats.avg_score }}</div>
+            <div style="color: #666;">平均分</div>
+        </div>
+
+        <div style="text-align: center; padding: 20px; background: #fff7e6; border-radius: 8px;">
+            <div style="font-size: 32px; font-weight: bold; color: #fa8c16;">{{ stats.max_score }}</div>
+            <div style="color: #666;">最高分</div>
+        </div>
+
+        <div style="text-align: center; padding: 20px; background: #fff2f0; border-radius: 8px;">
+            <div style="font-size: 32px; font-weight: bold; color: #ff4d4f;">{{ stats.min_score }}</div>
+            <div style="color: #666;">最低分</div>
+        </div>
+    </div>
+</div>
+
+<!-- 成绩分布 -->
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+    <h3 style="margin: 0 0 20px 0; color: #333;">成绩分布</h3>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
+        {% for range, count in stats.score_distribution.items() %}
+        <div style="text-align: center; padding: 15px; border: 1px solid #f0f0f0; border-radius: 8px;">
+            <div style="font-size: 24px; font-weight: bold;
+                {% if '优秀' in range %}color: #52c41a;
+                {% elif '良好' in range %}color: #1890ff;
+                {% elif '中等' in range %}color: #faad14;
+                {% elif '及格' in range %}color: #722ed1;
+                {% else %}color: #ff4d4f;{% endif %}">
+                {{ count }}
+            </div>
+            <div style="color: #666; font-size: 14px;">{{ range }}</div>
+            {% if stats.total_grades > 0 %}
+            <div style="color: #999; font-size: 12px;">
+                {{ "%.1f"|format(count / stats.total_grades * 100) }}%
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- 各课程统计 -->
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3 style="margin: 0 0 20px 0; color: #333;">各课程成绩统计</h3>
+
+    {% if stats.course_stats %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th>课程名称</th>
+            <th>平均分</th>
+            <th>成绩数量</th>
+            <th>等级分布</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for course in stats.course_stats %}
+        <tr>
+            <td><strong>{{ course.course_name }}</strong></td>
+            <td>
+                    <span class="badge {% if course.avg_score >= 90 %}badge-success
+                                      {% elif course.avg_score >= 80 %}badge-info
+                                      {% elif course.avg_score >= 70 %}badge-warning
+                                      {% elif course.avg_score >= 60 %}badge-primary
+                                      {% else %}badge-danger{% endif %}">
+                        {{ "%.1f"|format(course.avg_score) }}
+                    </span>
+            </td>
+            <td>{{ course.count }}</td>
+            <td>
+                <div style="display: flex; gap: 2px; height: 20px; width: 100px;">
+                    <!-- 这里可以添加成绩分布可视化 -->
+                    <div style="flex: 1; background: #f0f0f0; border-radius: 2px;"></div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="text-align: center; padding: 40px; color: #999;">
+        暂无课程成绩数据
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

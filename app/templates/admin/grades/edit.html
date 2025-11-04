@@ -1,0 +1,183 @@
+{% extends "admin/base.html" %}
+
+{% block title %}编辑成绩 - 成绩管理系统{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">编辑成绩</h1>
+    <a href="{{ url_for('admin.grade_list') }}" style="color: #1890ff; text-decoration: none;">返回列表</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <!-- 成绩编辑表单 -->
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0 0 20px 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+            {% if grade.is_locked %}
+            <span style="color: #ff4d4f;">🔒 成绩已锁定</span>
+            {% else %}
+            编辑成绩
+            {% endif %}
+        </h3>
+
+        <form method="POST" {% if grade.is_locked %}onsubmit="alert('成绩已锁定，无法编辑'); return false;" {% endif %}>
+            {{ form.hidden_tag() }}
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.student_id.label
+                    }}</label>
+                {{ form.student_id(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;",
+                disabled=grade.is_locked) }}
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.course_id.label }}</label>
+                {{ form.course_id(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;",
+                disabled=grade.is_locked) }}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.score.label }}</label>
+                    {{ form.score(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;",
+                    disabled=grade.is_locked) }}
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.semester.label
+                        }}</label>
+                    {{ form.semester(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;",
+                    disabled=grade.is_locked) }}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.academic_year.label
+                        }}</label>
+                    {{ form.academic_year(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius:
+                    4px;", disabled=grade.is_locked) }}
+                </div>
+
+                <div style="display: flex; align-items: center; margin-top: 25px;">
+                    {{ form.is_makeup(style="margin-right: 8px;", disabled=grade.is_locked) }}
+                    <label style="font-weight: bold; margin: 0;">{{ form.is_makeup.label }}</label>
+                </div>
+            </div>
+
+            {% if not grade.is_locked %}
+            <div style="display: flex; gap: 10px;">
+                <button type="submit"
+                        style="padding: 10px 20px; background: #1890ff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    更新成绩
+                </button>
+                <a href="{{ url_for('admin.grade_list') }}"
+                   style="padding: 10px 20px; background: #f5f5f5; color: #333; text-decoration: none; border-radius: 4px;">
+                    取消
+                </a>
+            </div>
+            {% else %}
+            <div style="background: #fff2e8; padding: 10px; border-radius: 4px; border: 1px solid #ffbb96;">
+                <div style="color: #d46b08; font-size: 14px;">
+                    🔒 此成绩已被锁定，无法编辑。如需修改请先解锁。
+                </div>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- 成绩信息概览 -->
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0 0 20px 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">成绩信息</h3>
+
+        <div style="margin-bottom: 20px;">
+            <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>学生:</strong>
+                <span>{{ grade.student.username }} ({{ grade.student.student_id }})</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>课程:</strong>
+                <span>{{ grade.course.course_name }} ({{ grade.course.course_code }})</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>成绩:</strong>
+                <span>
+                    <span class="badge {% if grade.score >= 90 %}badge-success
+                                      {% elif grade.score >= 80 %}badge-info
+                                      {% elif grade.score >= 70 %}badge-warning
+                                      {% elif grade.score >= 60 %}badge-primary
+                                      {% else %}badge-danger{% endif %}">
+                        {{ grade.score }}
+                    </span>
+                    {% if grade.is_makeup %}
+                    <span style="color: #ff4d4f; font-size: 12px;">(补考)</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>学期:</strong>
+                <span>{{ grade.semester }}</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>状态:</strong>
+                <span>
+                    {% if grade.is_locked %}
+                    <span class="badge badge-secondary">已锁定</span>
+                    {% else %}
+                    <span class="badge badge-success">可编辑</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- 修改历史 -->
+        <div style="margin-bottom: 20px;">
+            <h4 style="margin: 0 0 10px 0; color: #333;">修改历史</h4>
+            {% if grade.grade_modification_logs %}
+            <div style="max-height: 200px; overflow-y: auto;">
+                {% for log in grade.grade_modification_logs|sort(attribute='modified_at', reverse=true) %}
+                <div style="background: #f9f9f9; padding: 8px; margin-bottom: 5px; border-radius: 4px; font-size: 12px;">
+                    <div>
+                        <strong>{{ log.previous_score }} → {{ log.new_score }}</strong>
+                        <span style="color: #666; float: right;">{{ log.modified_at.strftime('%m-%d %H:%M') }}</span>
+                    </div>
+                    <div style="color: #999;">{{ log.modifier.username }} - {{ log.reason }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="color: #999; font-style: italic; font-size: 14px;">无修改记录</div>
+            {% endif %}
+        </div>
+
+        <!-- 快速操作 -->
+        <div>
+            <h4 style="margin: 0 0 10px 0; color: #333;">快速操作</h4>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                {% if grade.is_locked %}
+                <form method="POST" action="{{ url_for('admin.grade_unlock', grade_id=grade.id) }}">
+                    <button type="submit"
+                            style="width: 100%; padding: 8px; background: #52c41a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        🔓 解锁成绩
+                    </button>
+                </form>
+                {% else %}
+                <form method="POST" action="{{ url_for('admin.grade_lock', grade_id=grade.id) }}">
+                    <button type="submit"
+                            style="width: 100%; padding: 8px; background: #faad14; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        🔒 锁定成绩
+                    </button>
+                </form>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('admin.grade_delete', grade_id=grade.id) }}"
+                      onsubmit="return confirm('确定要删除这条成绩记录吗？此操作不可恢复！');">
+                    <button type="submit"
+                            style="width: 100%; padding: 8px; background: #ff4d4f; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        🗑️ 删除成绩
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

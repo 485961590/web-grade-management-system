@@ -12,7 +12,7 @@
     <p><a href="{{ url_for('admin.teacher_list') }}">• 管理教师账户</a></p>
     <p><a href="{{ url_for('admin.student_list') }}">• 管理学生账户</a></p>
     <p><a href="{{ url_for('admin.course_list') }}">• 管理课程信息</a></p>
-    <p><a href="#">• 管理全部成绩</a></p>
+    <p><a href="{{ url_for('admin.grade_list') }}">• 管理全部成绩</a></p>
 {% elif current_user.role.value == 'teacher' %}
     <h3>教师功能</h3>
     <p>• 录入课程成绩</p>
