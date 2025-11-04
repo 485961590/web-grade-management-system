@@ -31,11 +31,12 @@ def create_app():
 
     如何加载用户 (user_loader)
     """
-    # 初始化登录管理器
-    login_manager = LoginManager()  # 创建 LoginManager 对象
+    # 初始化和配置登录管理器
+    login_manager = LoginManager()
     login_manager.init_app(app)  # 将其与 Flask 应用关联
     login_manager.login_view = 'auth.login'  # 当用户访问需要登录的页面时，重定向到哪个路由，auth.login表示重定向到 auth 蓝图下的 login 路由
     login_manager.login_message = '请先登录'  # 重定向时显示的提示消息
+    login_manager.login_message_category = 'info'
 
     # 用户加载回调函数
     @login_manager.user_loader
@@ -45,8 +46,10 @@ def create_app():
 
     # 注册蓝图
     from app.auth import bp as auth_bp  # 导入认证蓝图
-    from app.main import bp as main_bp  # 导入主蓝图
     app.register_blueprint(auth_bp)
+    from app.main import bp as main_bp  # 导入主蓝图
     app.register_blueprint(main_bp)
+    from app.admin.routes import bp as admin_bp  # 导入admin蓝图
+    app.register_blueprint(admin_bp)
 
     return app

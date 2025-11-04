@@ -1,5 +1,5 @@
-<!-- app/templates/index.html -->
-{% extends "base.html" %}
+<!-- app/templates/auth/index.html -->
+{% extends "auth/base.html" %}
 
 {% block content %}
 <h2>欢迎使用成绩管理系统</h2>
@@ -8,9 +8,11 @@
 
 {% if current_user.role.value == 'admin' %}
     <h3>管理员功能</h3>
-    <p>• 管理用户账户</p>
-    <p>• 管理课程信息</p>
-    <p>• 管理全部成绩</p>
+    <p><a href="{{ url_for('admin.dashboard') }}">• 管理仪表板</a></p>
+    <p><a href="{{ url_for('admin.teacher_list') }}">• 管理教师账户</a></p>
+    <p><a href="{{ url_for('admin.student_list') }}">• 管理学生账户</a></p>
+    <p><a href="{{ url_for('admin.course_list') }}">• 管理课程信息</a></p>
+    <p><a href="#">• 管理全部成绩</a></p>
 {% elif current_user.role.value == 'teacher' %}
     <h3>教师功能</h3>
     <p>• 录入课程成绩</p>

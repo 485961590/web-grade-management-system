@@ -10,7 +10,7 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 @bp.route('/')
 @login_required
 def index():
-    return render_template('index.html')
+    return render_template('auth/index.html')
 
 
 @bp.route('/login', methods=['GET', 'POST'])
@@ -30,7 +30,7 @@ def login():
         else:
             flash('用户名或密码错误', 'error')
 
-    return render_template('login.html', form=form)
+    return render_template('auth/login.html', form=form)
 
 
 @bp.route('/logout')
@@ -54,7 +54,7 @@ def change_password():
         else:
             flash('当前密码错误', 'error')
 
-    return render_template('change_password.html', form=form)
+    return render_template('auth/change_password.html', form=form)
 
 
 @bp.route('/profile', methods=['GET', 'POST'])
@@ -72,4 +72,4 @@ def profile():
     form.email.data = current_user.email
     form.phone.data = current_user.phone
 
-    return render_template('profile.html', form=form)
+    return render_template('auth/profile.html', form=form)

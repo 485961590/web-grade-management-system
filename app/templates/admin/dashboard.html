@@ -1,0 +1,100 @@
+{% extends "admin/base.html" %}
+
+{% block title %}管理员仪表板 - 成绩管理系统{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">管理员数据面板</h1>
+    <div>
+        <span>欢迎，{{ current_user.username }}</span>
+    </div>
+</div>
+
+<!-- 统计卡片 -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>课程总数</h3>
+        <div class="number">{{ stats.total_courses }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>教师总数</h3>
+        <div class="number">{{ stats.total_teachers }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>学生总数</h3>
+        <div class="number">{{ stats.total_students }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>成绩记录</h3>
+        <div class="number">{{ stats.total_grades }}</div>
+    </div>
+</div>
+
+<!-- 快速操作 -->
+<div style="margin: 30px 0;">
+    <h3 style="margin-bottom: 15px; color: #333;">快速操作</h3>
+    <div class="quick-actions">
+        <a href="{{ url_for('admin.course_list') }}" class="action-btn">管理课程</a>
+        <a href="{{ url_for('admin.teacher_list') }}" class="action-btn">管理教师</a>
+        <a href="{{ url_for('admin.student_list') }}" class="action-btn">管理学生</a>
+        <a href="#" class="action-btn">成绩管理</a>
+    </div>
+</div>
+
+<!-- 最近成绩记录 -->
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3 style="margin: 0 0 20px 0; color: #333;">最近成绩记录</h3>
+
+    {% if stats.recent_grades %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>学生</th>
+                <th>课程</th>
+                <th>成绩</th>
+                <th>学期</th>
+                <th>录入时间</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for grade in stats.recent_grades %}
+            <tr>
+                <td>{{ grade.student.username if grade.student else 'N/A' }}</td>
+                <td>{{ grade.course.course_name if grade.course else 'N/A' }}</td>
+                <td>
+                    <span class="badge {% if grade.score >= 60 %}badge-success{% else %}badge-danger{% endif %}">
+                        {{ grade.score }}
+                    </span>
+                </td>
+                <td>{{ grade.semester }}</td>
+                <td>{{ grade.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="text-align: center; padding: 40px; color: #999;">
+        暂无成绩记录
+    </div>
+    {% endif %}
+</div>
+
+<!-- 系统信息 -->
+<div style="margin-top: 30px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3 style="margin: 0 0 15px 0; color: #333;">系统信息</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+        <div>
+            <strong>当前用户:</strong> {{ current_user.username }}
+        </div>
+        <div>
+            <strong>用户角色:</strong> 管理员
+        </div>
+        <div>
+            <strong>登录时间:</strong> {{ current_user.created_at.strftime('%Y-%m-%d %H:%M') if current_user.created_at else 'N/A' }}
+        </div>
+        <div>
+            <strong>系统状态:</strong> <span style="color: #52c41a;">运行正常</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
