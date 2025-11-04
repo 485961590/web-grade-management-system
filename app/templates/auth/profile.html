@@ -2,27 +2,31 @@
 {% extends "auth/base.html" %}
 
 {% block content %}
-<h2>个人信息</h2>
-<form method="POST">
-    {{ form.hidden_tag() }}
-    <div class="form-group">
-        <label>用户名</label><br>
-        <input type="text" value="{{ current_user.username }}" disabled>
+<div style="max-width: 500px; margin: 0 auto;">
+    <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid #f0f0f0;">
+        <h2 style="margin-top: 0; margin-bottom: 25px; color: #333;">个人信息</h2>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">用户名</label>
+                <input type="text" value="{{ current_user.username }}" disabled style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5; color: #666; box-sizing: border-box;">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">角色</label>
+                <input type="text" value="{{ current_user.role.value }}" disabled style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5; color: #666; box-sizing: border-box;">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">{{ form.email.label }}</label>
+                {{ form.email(value=current_user.email or '', style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;") }}
+            </div>
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">{{ form.phone.label }}</label>
+                {{ form.phone(value=current_user.phone or '', style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;") }}
+            </div>
+            <div>
+                {{ form.submit(style="width: 100%; padding: 12px; background: #1890ff; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer;") }}
+            </div>
+        </form>
     </div>
-    <div class="form-group">
-        <label>角色</label><br>
-        <input type="text" value="{{ current_user.role.value }}" disabled>
-    </div>
-    <div class="form-group">
-        {{ form.email.label }}<br>
-        {{ form.email(value=current_user.email or '') }}
-    </div>
-    <div class="form-group">
-        {{ form.phone.label }}<br>
-        {{ form.phone(value=current_user.phone or '') }}
-    </div>
-    <div class="form-group">
-        {{ form.submit() }}
-    </div>
-</form>
+</div>
 {% endblock %}

@@ -6,62 +6,59 @@
     <title>成绩管理系统</title>
     <style>
         body {
-            font-family: Arial;
+            font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            background: #f5f5f5;
         }
 
         .navbar {
             background: #1890ff;
-            padding: 10px;
-            margin-bottom: 20px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .navbar a {
             color: white;
-            margin-right: 15px;
+            margin-right: 20px;
             text-decoration: none;
+            font-weight: 500;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .user-info {
+            color: white;
+            float: right;
+            font-weight: 500;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        input {
-            padding: 8px;
-            width: 200px;
-        }
-
-        button {
-            padding: 8px 15px;
-            background: #1890ff;
-            color: white;
-            border: none;
+            padding: 0 20px;
         }
 
         .alert {
-            padding: 10px;
-            margin: 10px 0;
+            padding: 12px 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+            border: 1px solid transparent;
         }
 
         .alert-error {
             background: #ffebee;
             color: #c62828;
+            border-color: #f5c6cb;
         }
 
         .alert-success {
             background: #e8f5e8;
             color: #2e7d32;
+            border-color: #c3e6cb;
         }
     </style>
 </head>
@@ -72,11 +69,7 @@
     <a href="{{ url_for('auth.profile') }}">个人信息</a>
     <a href="{{ url_for('auth.change_password') }}">修改密码</a>
     <a href="{{ url_for('auth.logout') }}">退出</a>
-    <span style="color: white;">欢迎, {{ current_user.username }} ({{ current_user.role.value }})</span>
-    <!-- current_user.username，current_user.role.value为什么能直接访问？ -->
-    <!-- Flask-Login 通过 @login_manager.user_loader 从数据库加载用户 -->
-    <!-- current_user 自动拥有 User 模型的所有属性和方法 -->
-    <!-- 模板上下文：Flask 自动将 current_user 注入到所有模板中 -->
+    <span class="user-info">欢迎, {{ current_user.username }} ({{ current_user.role.value }})</span>
     {% else %}
     <a href="{{ url_for('auth.login') }}">登录</a>
     {% endif %}

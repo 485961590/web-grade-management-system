@@ -2,27 +2,63 @@
 {% extends "auth/base.html" %}
 
 {% block content %}
-<h2>欢迎使用成绩管理系统</h2>
-<p>当前用户: {{ current_user.username }}</p>
-<p>用户角色: {{ current_user.role.value }}</p>
+<div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+    <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid #f0f0f0;">
+        <h2 style="margin-top: 0; margin-bottom: 20px; color: #333;">欢迎使用成绩管理系统</h2>
 
-{% if current_user.role.value == 'admin' %}
-    <h3>管理员功能</h3>
-    <p><a href="{{ url_for('admin.dashboard') }}">• 管理仪表板</a></p>
-    <p><a href="{{ url_for('admin.teacher_list') }}">• 管理教师账户</a></p>
-    <p><a href="{{ url_for('admin.student_list') }}">• 管理学生账户</a></p>
-    <p><a href="{{ url_for('admin.course_list') }}">• 管理课程信息</a></p>
-    <p><a href="{{ url_for('admin.grade_list') }}">• 管理全部成绩</a></p>
-{% elif current_user.role.value == 'teacher' %}
-    <h3>教师功能</h3>
-    <p>• 录入课程成绩</p>
-    <p>• 查询所授课程成绩</p>
-{% elif current_user.role.value == 'student' %}
-    <h3>学生功能</h3>
-    <p>• 查询个人成绩</p>
-{% elif current_user.role.value == 'class_teacher' %}
-    <h3>班主任功能</h3>
-    <p>• 查询班级成绩</p>
-    <p>• 查看成绩统计</p>
-{% endif %}
+        <div style="margin-bottom: 25px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+            <p style="margin: 5px 0; color: #666;"><strong>当前用户:</strong> {{ current_user.username }}</p>
+            <p style="margin: 5px 0; color: #666;"><strong>用户角色:</strong> {{ current_user.role.value }}</p>
+        </div>
+
+        {% if current_user.role.value == 'admin' %}
+            <h3 style="color: #333; margin-bottom: 15px;">管理员功能</h3>
+            <div style="display: grid; gap: 10px;">
+                <a href="{{ url_for('admin.dashboard') }}" style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #1890ff;">
+                    管理仪表板
+                </a>
+                <a href="{{ url_for('admin.teacher_list') }}" style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #52c41a;">
+                    管理教师账户
+                </a>
+                <a href="{{ url_for('admin.student_list') }}" style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #faad14;">
+                    管理学生账户
+                </a>
+                <a href="{{ url_for('admin.course_list') }}" style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #f5222d;">
+                    管理课程信息
+                </a>
+                <a href="{{ url_for('admin.grade_list') }}" style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #722ed1;">
+                    管理全部成绩
+                </a>
+            </div>
+
+        {% elif current_user.role.value == 'teacher' %}
+            <h3 style="color: #333; margin-bottom: 15px;">教师功能</h3>
+            <div style="display: grid; gap: 10px;">
+                <div style="padding: 12px 15px; background: #f8f9fa; border-radius: 6px; color: #333; border-left: 4px solid #1890ff;">
+                    录入课程成绩
+                </div>
+                <div style="padding: 12px 15px; background: #f8f9fa; border-radius: 6px; color: #333; border-left: 4px solid #52c41a;">
+                    查询所授课程成绩
+                </div>
+            </div>
+
+        {% elif current_user.role.value == 'student' %}
+            <h3 style="color: #333; margin-bottom: 15px;">学生功能</h3>
+            <div style="padding: 12px 15px; background: #f8f9fa; border-radius: 6px; color: #333; border-left: 4px solid #1890ff;">
+                查询个人成绩
+            </div>
+
+        {% elif current_user.role.value == 'class_teacher' %}
+            <h3 style="color: #333; margin-bottom: 15px;">班主任功能</h3>
+            <div style="display: grid; gap: 10px;">
+                <div style="padding: 12px 15px; background: #f8f9fa; border-radius: 6px; color: #333; border-left: 4px solid #1890ff;">
+                    查询班级成绩
+                </div>
+                <div style="padding: 12px 15px; background: #f8f9fa; border-radius: 6px; color: #333; border-left: 4px solid #52c41a;">
+                    查看成绩统计
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

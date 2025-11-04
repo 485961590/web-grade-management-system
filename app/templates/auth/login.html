@@ -2,19 +2,23 @@
 {% extends "auth/base.html" %}
 
 {% block content %}
-<h2>用户登录</h2>
-<form method="POST">
-    {{ form.hidden_tag() }}
-    <div class="form-group">
-        {{ form.username.label }}<br>
-        {{ form.username() }}
+<div style="max-width: 400px; margin: 0 auto;">
+    <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid #f0f0f0;">
+        <h2 style="margin-top: 0; margin-bottom: 25px; text-align: center; color: #333;">用户登录</h2>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">{{ form.username.label }}</label>
+                {{ form.username(style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;") }}
+            </div>
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">{{ form.password.label }}</label>
+                {{ form.password(style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;") }}
+            </div>
+            <div>
+                {{ form.submit(style="width: 100%; padding: 12px; background: #1890ff; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer;") }}
+            </div>
+        </form>
     </div>
-    <div class="form-group">
-        {{ form.password.label }}<br>
-        {{ form.password() }}
-    </div>
-    <div class="form-group">
-        {{ form.submit() }}
-    </div>
-</form>
+</div>
 {% endblock %}
