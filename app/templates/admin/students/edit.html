@@ -1,10 +1,140 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "admin/base.html" %}
 
-</body>
-</html>
+{% block title %}编辑学生 - 成绩管理系统{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">编辑学生</h1>
+    <a href="{{ url_for('admin.student_list') }}" style="color: #1890ff; text-decoration: none;">返回列表</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <!-- 基本信息编辑 -->
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0 0 20px 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">基本信息</h3>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.student_id.label }}</label>
+                {{ form.student_id(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+                {% if form.student_id.errors %}
+                    <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                        {% for error in form.student_id.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.username.label }}</label>
+                {{ form.username(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+                {% if form.username.errors %}
+                    <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                        {% for error in form.username.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.class_id.label }}</label>
+                    {{ form.class_id(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.major.label }}</label>
+                    {{ form.major(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.email.label }}</label>
+                    {{ form.email(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.phone.label }}</label>
+                    {{ form.phone(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" style="padding: 10px 20px; background: #1890ff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    更新学生信息
+                </button>
+                <a href="{{ url_for('admin.student_list') }}"
+                   style="padding: 10px 20px; background: #f5f5f5; color: #333; text-decoration: none; border-radius: 4px;">
+                    取消
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- 学生信息概览 -->
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0 0 20px 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">学生信息</h3>
+
+        <div style="margin-bottom: 20px;">
+            <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>学号:</strong>
+                <span>{{ student.student_id }}</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>姓名:</strong>
+                <span>{{ student.username }}</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>班级:</strong>
+                <span>
+                    {% if student.class_ %}
+                        {{ student.class_.class_name }}
+                    {% else %}
+                        <span style="color: #999;">未分配</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>专业:</strong>
+                <span>{{ student.major or '未设置' }}</span>
+            </div>
+        </div>
+
+        <!-- 成绩信息 -->
+        <div style="margin-bottom: 20px;">
+            <h4 style="margin: 0 0 10px 0; color: #333;">成绩记录</h4>
+            {% if student.grades.count() > 0 %}
+                <div style="color: #52c41a; font-weight: bold;">
+                    {{ student.grades.count() }} 条成绩记录
+                </div>
+            {% else %}
+                <div style="color: #999; font-style: italic;">暂无成绩记录</div>
+            {% endif %}
+        </div>
+
+        <!-- 快速操作 -->
+        <div>
+            <h4 style="margin: 0 0 10px 0; color: #333;">快速操作</h4>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <form method="POST" action="{{ url_for('admin.student_reset_password', student_id=student.id) }}"
+                      onsubmit="return confirm('确定要重置学生【{{ student.username }}】的密码吗？');">
+                    <button type="submit" style="width: 100%; padding: 8px; background: #52c41a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        🔑 重置密码
+                    </button>
+                </form>
+
+                <form method="POST" action="{{ url_for('admin.student_delete', student_id=student.id) }}"
+                      onsubmit="return confirm('确定要删除学生【{{ student.username }}】吗？此操作不可恢复！');">
+                    <button type="submit" style="width: 100%; padding: 8px; background: #ff4d4f; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        🗑️ 删除学生
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,166 @@
+{% extends "admin/base.html" %}
+
+{% block title %}班级管理 - 成绩管理系统{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">班级管理</h1>
+    <a href="{{ url_for('admin.class_create') }}" class="action-btn" style="display: inline-block; padding: 8px 16px;">
+        添加班级
+    </a>
+</div>
+
+<!-- 搜索和筛选区域 -->
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+    <form method="GET" action="{{ url_for('admin.class_list') }}"
+          style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 200px;">
+            <input type="text" name="search" placeholder="搜索班级代码、名称或专业"
+                   value="{{ request.args.get('search', '') }}"
+                   style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+
+        <!-- 专业筛选 -->
+        <div>
+            <select name="major" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <option value="">所有专业</option>
+                {% for major in majors %}
+                <option value="{{ major }}" {% if current_major== major %}selected{% endif %}>
+                    {{ major }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit"
+                style="padding: 8px 16px; background: #1890ff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            搜索
+        </button>
+
+        {% if request.args.get('search') or current_major %}
+        <a href="{{ url_for('admin.class_list') }}"
+           style="padding: 8px 16px; background: #f5f5f5; color: #333; text-decoration: none; border-radius: 4px;">
+            重置
+        </a>
+        {% endif %}
+    </form>
+
+    <!-- 搜索结果显示 -->
+    {% if request.args.get('search') or current_major %}
+    <div style="margin-top: 10px; color: #666; font-size: 14px;">
+        {% if request.args.get('search') %}
+        <span>搜索关键词: "<strong>{{ request.args.get('search') }}</strong>"</span>
+        {% endif %}
+        {% if current_major %}
+        <span style="margin-left: 15px;">专业: <strong>{{ current_major }}</strong></span>
+        {% endif %}
+        <span style="margin-left: 15px;">找到 <strong>{{ classes.total }}</strong> 个班级</span>
+        {% if classes.total > 0 %}
+        <span style="margin-left: 15px;">第 {{ classes.page }} 页 / 共 {{ classes.pages }} 页</span>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- 班级列表 -->
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    {% if classes.items %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th>班级代码</th>
+            <th>班级名称</th>
+            <th>专业</th>
+            <th>班主任</th>
+            <th>学生人数</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for class in classes.items %}
+        <tr>
+            <td><strong>{{ class.class_code }}</strong></td>
+            <td>{{ class.class_name }}</td>
+            <td>{{ class.major }}</td>
+            <td>
+                {% if class.class_teacher %}
+                {{ class.class_teacher.username }}
+                {% else %}
+                <span style="color: #999;">未分配</span>
+                {% endif %}
+            </td>
+            <td>
+                <span class="badge badge-info">{{ class.students.count() }}人</span>
+            </td>
+            <td>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <a href="{{ url_for('admin.class_edit', class_id=class.id) }}"
+                       style="color: #1890ff; text-decoration: none; font-size: 12px;">编辑</a>
+                    <form method="POST" action="{{ url_for('admin.class_delete', class_id=class.id) }}"
+                          style="display: inline;"
+                          onsubmit="return confirm('确定要删除班级【{{ class.class_name }}】吗？此操作不可恢复！');">
+                        <button type="submit"
+                                style="color: #ff4d4f; background: none; border: none; cursor: pointer; font-size: 12px;">
+                            🗑️ 删除
+                        </button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- 分页 -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+        <div style="color: #666; font-size: 14px;">
+            显示第 {{ (classes.page - 1) * classes.per_page + 1 }} -
+            {{ [classes.page * classes.per_page, classes.total]|min }} 条，共 {{ classes.total }} 条记录
+        </div>
+
+        <div style="display: flex; gap: 5px;">
+            {% if classes.has_prev %}
+            <a href="{{ url_for('admin.class_list', page=classes.prev_num, search=request.args.get('search', ''), major=current_major) }}"
+               style="padding: 8px 12px; color: #1890ff; text-decoration: none; border: 1px solid #ddd; border-radius: 4px;">
+                ← 上一页
+            </a>
+            {% endif %}
+
+            {% for page_num in classes.iter_pages(left_edge=2, left_current=2, right_current=2, right_edge=2) %}
+            {% if page_num %}
+            {% if page_num == classes.page %}
+            <span style="padding: 8px 12px; background: #1890ff; color: white; border-radius: 4px;">{{ page_num }}</span>
+            {% else %}
+            <a href="{{ url_for('admin.class_list', page=page_num, search=request.args.get('search', ''), major=current_major) }}"
+               style="padding: 8px 12px; color: #1890ff; text-decoration: none; border: 1px solid #ddd; border-radius: 4px;">{{
+                page_num }}</a>
+            {% endif %}
+            {% else %}
+            <span style="padding: 8px 12px; color: #999;">...</span>
+            {% endif %}
+            {% endfor %}
+
+            {% if classes.has_next %}
+            <a href="{{ url_for('admin.class_list', page=classes.next_num, search=request.args.get('search', ''), major=current_major) }}"
+               style="padding: 8px 12px; color: #1890ff; text-decoration: none; border: 1px solid #ddd; border-radius: 4px;">
+                下一页 →
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 60px 20px; color: #999;">
+        {% if request.args.get('search') or current_major %}
+        <div style="font-size: 48px; margin-bottom: 20px;">🔍</div>
+        <h3 style="margin: 0 0 10px 0; color: #666;">没有找到匹配的班级</h3>
+        <p>请尝试使用其他关键词搜索，或 <a href="{{ url_for('admin.class_list') }}"
+                                          style="color: #1890ff;">查看所有班级</a></p>
+        {% else %}
+        <div style="font-size: 48px; margin-bottom: 20px;">🏫</div>
+        <h3 style="margin: 0 0 10px 0; color: #666;">暂无班级数据</h3>
+        <p><a href="{{ url_for('admin.class_create') }}" style="color: #1890ff;">点击添加第一个班级</a></p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

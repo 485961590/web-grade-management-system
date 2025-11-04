@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import or_
 
 from app.models import db, Course, Teacher, Student, Class, User, RoleType, Grade
-from app.admin.forms import CourseForm, TeacherForm, StudentForm, TeacherCourseForm
+from app.admin.forms import CourseForm, TeacherForm, StudentForm, TeacherCourseForm, ClassForm
 from app.admin.decorators import admin_required
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -354,11 +354,28 @@ def student_list():
     page = request.args.get('page', 1, type=int)
     per_page = 20
     class_filter = request.args.get('class_id', type=int)
+    search = request.args.get('search', '')
+    major_filter = request.args.get('major', '')
 
     query = Student.query
 
+    # 班级筛选
     if class_filter:
         query = query.filter(Student.class_id == class_filter)
+
+    # 搜索功能
+    if search:
+        query = query.filter(
+            db.or_(
+                Student.student_id.ilike(f'%{search}%'),
+                Student.username.ilike(f'%{search}%'),
+                Student.major.ilike(f'%{search}%')
+            )
+        )
+
+    # 专业筛选
+    if major_filter:
+        query = query.filter(Student.major == major_filter)
 
     students = query.order_by(Student.student_id).paginate(
         page=page, per_page=per_page, error_out=False
@@ -366,10 +383,16 @@ def student_list():
 
     classes = Class.query.order_by(Class.class_name).all()
 
+    # 获取所有专业用于筛选
+    majors = db.session.query(Student.major).distinct().all()
+    majors = [major[0] for major in majors if major[0]]
+
     return render_template('admin/students/list.html',
                            students=students,
                            classes=classes,
-                           current_class=class_filter)
+                           majors=majors,
+                           current_class=class_filter,
+                           current_major=major_filter)
 
 
 @bp.route('/students/create', methods=['GET', 'POST'])
@@ -471,3 +494,145 @@ def student_reset_password(student_id):
 
     flash(f'学生 "{student.username}" 密码已重置为: {new_password}', 'success')
     return redirect(url_for('admin.student_list'))
+
+
+@bp.route('/students/<int:student_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def student_delete(student_id):
+    """删除学生"""
+    student = Student.query.get_or_404(student_id)
+
+    # 检查是否有成绩关联
+    if student.grades.count() > 0:
+        flash('无法删除该学生，因为已有成绩记录关联', 'error')
+        return redirect(url_for('admin.student_list'))
+
+    # 删除学生
+    db.session.delete(student)
+    db.session.commit()
+
+    flash(f'学生 "{student.username}" 已删除', 'success')
+    return redirect(url_for('admin.student_list'))
+
+
+# ==================== 班级管理 ====================
+
+@bp.route('/classes')
+@login_required
+@admin_required
+def class_list():
+    """班级列表"""
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+    search = request.args.get('search', '')
+    major_filter = request.args.get('major', '')
+
+    query = Class.query
+
+    # 搜索功能
+    if search:
+        query = query.filter(
+            db.or_(
+                Class.class_code.ilike(f'%{search}%'),
+                Class.class_name.ilike(f'%{search}%'),
+                Class.major.ilike(f'%{search}%')
+            )
+        )
+
+    # 专业筛选
+    if major_filter:
+        query = query.filter(Class.major == major_filter)
+
+    classes = query.order_by(Class.class_code).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+
+    # 获取所有专业用于筛选
+    majors = db.session.query(Class.major).distinct().all()
+    majors = [major[0] for major in majors if major[0]]
+
+    return render_template('admin/classes/list.html',
+                           classes=classes,
+                           majors=majors,
+                           current_major=major_filter)
+
+
+@bp.route('/classes/create', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def class_create():
+    """创建班级"""
+    form = ClassForm()
+
+    if form.validate_on_submit():
+        # 检查班级代码是否已存在
+        existing_class = Class.query.filter_by(class_code=form.class_code.data).first()
+        if existing_class:
+            flash('班级代码已存在', 'error')
+            return render_template('admin/classes/create.html', form=form)
+
+        class_ = Class(
+            class_code=form.class_code.data,
+            class_name=form.class_name.data,
+            major=form.major.data,
+            class_teacher_id=form.class_teacher_id.data if form.class_teacher_id.data != 0 else None
+        )
+
+        db.session.add(class_)
+        db.session.commit()
+
+        flash(f'班级 "{form.class_name.data}" 创建成功', 'success')
+        return redirect(url_for('admin.class_list'))
+
+    return render_template('admin/classes/create.html', form=form)
+
+
+@bp.route('/classes/<int:class_id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def class_edit(class_id):
+    """编辑班级"""
+    class_ = Class.query.get_or_404(class_id)
+    form = ClassForm(obj=class_)
+
+    if form.validate_on_submit():
+        # 检查班级代码是否与其他班级冲突
+        existing_class = Class.query.filter(
+            Class.class_code == form.class_code.data,
+            Class.id != class_id
+        ).first()
+
+        if existing_class:
+            flash('班级代码已存在', 'error')
+            return render_template('admin/classes/edit.html', form=form, class_=class_)
+
+        class_.class_code = form.class_code.data
+        class_.class_name = form.class_name.data
+        class_.major = form.major.data
+        class_.class_teacher_id = form.class_teacher_id.data if form.class_teacher_id.data != 0 else None
+
+        db.session.commit()
+        flash(f'班级 "{form.class_name.data}" 更新成功', 'success')
+        return redirect(url_for('admin.class_list'))
+
+    return render_template('admin/classes/edit.html', form=form, class_=class_)
+
+
+@bp.route('/classes/<int:class_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def class_delete(class_id):
+    """删除班级"""
+    class_ = Class.query.get_or_404(class_id)
+
+    # 检查是否有学生关联
+    if class_.students.count() > 0:
+        flash('无法删除该班级，因为已有学生关联', 'error')
+        return redirect(url_for('admin.class_list'))
+
+    db.session.delete(class_)
+    db.session.commit()
+
+    flash(f'班级 "{class_.class_name}" 已删除', 'success')
+    return redirect(url_for('admin.class_list'))

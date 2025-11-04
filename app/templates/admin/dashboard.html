@@ -21,6 +21,10 @@
         <div class="number">{{ stats.total_teachers }}</div>
     </div>
     <div class="stat-card">
+        <h3>班级数量</h3>
+        <div class="number">{{ stats.total_classes }}</div>
+    </div>
+    <div class="stat-card">
         <h3>学生总数</h3>
         <div class="number">{{ stats.total_students }}</div>
     </div>
@@ -37,6 +41,7 @@
         <a href="{{ url_for('admin.course_list') }}" class="action-btn">管理课程</a>
         <a href="{{ url_for('admin.teacher_list') }}" class="action-btn">管理教师</a>
         <a href="{{ url_for('admin.student_list') }}" class="action-btn">管理学生</a>
+        <a href="{{ url_for('admin.class_list') }}" class="action-btn">管理班级</a>
         <a href="#" class="action-btn">成绩管理</a>
     </div>
 </div>

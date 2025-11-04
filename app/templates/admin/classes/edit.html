@@ -1,0 +1,125 @@
+{% extends "admin/base.html" %}
+
+{% block title %}编辑班级 - 成绩管理系统{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">编辑班级</h1>
+    <a href="{{ url_for('admin.class_list') }}" style="color: #1890ff; text-decoration: none;">返回列表</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <!-- 基本信息编辑 -->
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0 0 20px 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">基本信息</h3>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.class_code.label
+                    }}</label>
+                {{ form.class_code(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+                {% if form.class_code.errors %}
+                <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                    {% for error in form.class_code.errors %}
+                    {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.class_name.label
+                    }}</label>
+                {{ form.class_name(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+                {% if form.class_name.errors %}
+                <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                    {% for error in form.class_name.errors %}
+                    {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.major.label }}</label>
+                {{ form.major(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.class_teacher_id.label
+                    }}</label>
+                {{ form.class_teacher_id(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;")
+                }}
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="submit"
+                        style="padding: 10px 20px; background: #1890ff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    更新班级信息
+                </button>
+                <a href="{{ url_for('admin.class_list') }}"
+                   style="padding: 10px 20px; background: #f5f5f5; color: #333; text-decoration: none; border-radius: 4px;">
+                    取消
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- 班级信息概览 -->
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0 0 20px 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">班级信息</h3>
+
+        <div style="margin-bottom: 20px;">
+            <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>代码:</strong>
+                <span>{{ class_.class_code }}</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>名称:</strong>
+                <span>{{ class_.class_name }}</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>专业:</strong>
+                <span>{{ class_.major }}</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>班主任:</strong>
+                <span>
+                    {% if class_.class_teacher %}
+                        {{ class_.class_teacher.username }}
+                    {% else %}
+                        <span style="color: #999;">未分配</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- 学生信息 -->
+        <div style="margin-bottom: 20px;">
+            <h4 style="margin: 0 0 10px 0; color: #333;">班级学生</h4>
+            {% if class_.students.count() > 0 %}
+            <div style="color: #52c41a; font-weight: bold;">
+                {{ class_.students.count() }} 名学生
+            </div>
+            {% else %}
+            <div style="color: #999; font-style: italic;">暂无学生</div>
+            {% endif %}
+        </div>
+
+        <!-- 快速操作 -->
+        <div>
+            <h4 style="margin: 0 0 10px 0; color: #333;">快速操作</h4>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <form method="POST" action="{{ url_for('admin.class_delete', class_id=class_.id) }}"
+                      onsubmit="return confirm('确定要删除班级【{{ class_.class_name }}】吗？此操作不可恢复！');">
+                    <button type="submit"
+                            style="width: 100%; padding: 8px; background: #ff4d4f; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        🗑️ 删除班级
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
