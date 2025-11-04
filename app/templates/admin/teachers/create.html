@@ -1,10 +1,111 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "admin/base.html" %}
 
-</body>
-</html>
+{% block title %}添加教师 - 成绩管理系统{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">添加教师</h1>
+    <a href="{{ url_for('admin.teacher_list') }}" style="color: #1890ff; text-decoration: none;">返回列表</a>
+</div>
+
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 600px;">
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.teacher_id.label }}</label>
+                {{ form.teacher_id(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;", placeholder="如：T2024001") }}
+                {% if form.teacher_id.errors %}
+                    <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                        {% for error in form.teacher_id.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.username.label }}</label>
+                {{ form.username(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;", placeholder="教师姓名") }}
+                {% if form.username.errors %}
+                    <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                        {% for error in form.username.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.department.label }}</label>
+                {{ form.department(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+                {% if form.department.errors %}
+                    <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                        {% for error in form.department.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.title.label }}</label>
+                {{ form.title(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;", placeholder="如：教授、副教授") }}
+                {% if form.title.errors %}
+                    <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                        {% for error in form.title.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.email.label }}</label>
+                {{ form.email(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;", placeholder="邮箱地址") }}
+                {% if form.email.errors %}
+                    <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                        {% for error in form.email.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.phone.label }}</label>
+                {{ form.phone(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;", placeholder="手机号码") }}
+                {% if form.phone.errors %}
+                    <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                        {% for error in form.phone.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 密码提示 -->
+        <div style="background: #e6f7ff; padding: 10px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #1890ff;">
+            <div style="font-size: 14px; color: #1890ff;">
+                <strong>密码设置说明：</strong>系统将自动使用教师工号后6位作为初始密码
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" style="padding: 10px 20px; background: #1890ff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                保存教师信息
+            </button>
+            <a href="{{ url_for('admin.teacher_list') }}"
+               style="padding: 10px 20px; background: #f5f5f5; color: #333; text-decoration: none; border-radius: 4px;">
+                取消
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

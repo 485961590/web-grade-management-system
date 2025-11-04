@@ -1,10 +1,148 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "admin/base.html" %}
 
-</body>
-</html>
+{% block title %}编辑教师 - 成绩管理系统{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">编辑教师</h1>
+    <a href="{{ url_for('admin.teacher_list') }}" style="color: #1890ff; text-decoration: none;">返回列表</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <!-- 基本信息编辑 -->
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0 0 20px 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">基本信息</h3>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.teacher_id.label
+                    }}</label>
+                {{ form.teacher_id(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+                {% if form.teacher_id.errors %}
+                <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                    {% for error in form.teacher_id.errors %}
+                    {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.username.label }}</label>
+                {{ form.username(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+                {% if form.username.errors %}
+                <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                    {% for error in form.username.errors %}
+                    {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.department.label
+                        }}</label>
+                    {{ form.department(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;")
+                    }}
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.title.label }}</label>
+                    {{ form.title(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.email.label }}</label>
+                    {{ form.email(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.phone.label }}</label>
+                    {{ form.phone(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="submit"
+                        style="padding: 10px 20px; background: #1890ff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    更新教师信息
+                </button>
+                <a href="{{ url_for('admin.teacher_list') }}"
+                   style="padding: 10px 20px; background: #f5f5f5; color: #333; text-decoration: none; border-radius: 4px;">
+                    取消
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- 教师信息概览 -->
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0 0 20px 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">教师信息</h3>
+
+        <div style="margin-bottom: 20px;">
+            <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>工号:</strong>
+                <span>{{ teacher.teacher_id }}</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>姓名:</strong>
+                <span>{{ teacher.username }}</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>院系:</strong>
+                <span>{{ teacher.department or '未设置' }}</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>职称:</strong>
+                <span>{{ teacher.title or '未设置' }}</span>
+            </div>
+        </div>
+
+        <!-- 授课课程信息 -->
+        <div style="margin-bottom: 20px;">
+            <h4 style="margin: 0 0 10px 0; color: #333;">授课课程</h4>
+            {% if teacher.courses %}
+            <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                {% for course in teacher.courses %}
+                <span style="background: #e6f7ff; color: #1890ff; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
+                        {{ course.course_name }}
+                    </span>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="color: #999; font-style: italic;">暂无授课课程</div>
+            {% endif %}
+        </div>
+
+        <!-- 快速操作 -->
+        <div>
+            <h4 style="margin: 0 0 10px 0; color: #333;">快速操作</h4>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <a href="{{ url_for('admin.teacher_courses', teacher_id=teacher.id) }}"
+                   style="width: 100%; padding: 8px; background: #722ed1; color: white; text-decoration: none; border-radius: 4px; text-align: center; display: block;">
+                    管理课程
+                </a>
+                <form method="POST" action="{{ url_for('admin.teacher_reset_password', teacher_id=teacher.id) }}"
+                      onsubmit="return confirm('确定要重置教师【{{ teacher.username }}】的密码吗？');">
+                    <button type="submit"
+                            style="width: 100%; padding: 8px; background: #52c41a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        重置密码
+                    </button>
+                </form>
+
+                <form method="POST" action="{{ url_for('admin.teacher_delete', teacher_id=teacher.id) }}"
+                      onsubmit="return confirm('确定要删除教师【{{ teacher.username }}】吗？此操作不可恢复！');">
+                    <button type="submit"
+                            style="width: 100%; padding: 8px; background: #ff4d4f; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        🗑️ 删除教师
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

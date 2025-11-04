@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import or_
 
 from app.models import db, Course, Teacher, Student, Class, User, RoleType, Grade
-from app.admin.forms import CourseForm, TeacherForm, StudentForm
+from app.admin.forms import CourseForm, TeacherForm, StudentForm, TeacherCourseForm
 from app.admin.decorators import admin_required
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -34,10 +34,35 @@ def dashboard():
 def course_list():
     """课程列表"""
     page = request.args.get('page', 1, type=int)
-    per_page = 20
+    per_page = request.args.get('per_page', 20, type=int)
+    search = request.args.get('search', '')
+    sort = request.args.get('sort', 'code')  # 默认按课程代码排序
 
-    courses = Course.query.order_by(Course.course_code).paginate(
-        page=page, per_page=per_page, error_out=False
+    # 构建查询
+    query = Course.query
+
+    # 搜索功能
+    if search:
+        query = query.filter(
+            db.or_(
+                Course.course_code.ilike(f'%{search}%'),
+                Course.course_name.ilike(f'%{search}%')
+            )
+        )
+
+    # 排序功能
+    if sort == 'name':
+        query = query.order_by(Course.course_name)
+    elif sort == 'credits':
+        query = query.order_by(Course.credits.desc())
+    else:  # 默认按课程代码排序
+        query = query.order_by(Course.course_code)
+
+    # 分页
+    courses = query.paginate(
+        page=page,
+        per_page=per_page,
+        error_out=False
     )
 
     return render_template('admin/courses/list.html', courses=courses)
@@ -134,8 +159,27 @@ def teacher_list():
     """教师列表"""
     page = request.args.get('page', 1, type=int)
     per_page = 20
+    search = request.args.get('search', '')
+    department = request.args.get('department', '')
 
-    teachers = Teacher.query.order_by(Teacher.teacher_id).paginate(
+    # 构建查询
+    query = Teacher.query
+
+    # 搜索功能
+    if search:
+        query = query.filter(
+            db.or_(
+                Teacher.teacher_id.ilike(f'%{search}%'),
+                Teacher.username.ilike(f'%{search}%'),
+                Teacher.department.ilike(f'%{search}%')
+            )
+        )
+
+    # 院系筛选
+    if department:
+        query = query.filter(Teacher.department == department)
+
+    teachers = query.order_by(Teacher.teacher_id).paginate(
         page=page, per_page=per_page, error_out=False
     )
 
@@ -241,6 +285,63 @@ def teacher_reset_password(teacher_id):
 
     flash(f'教师 "{teacher.username}" 密码已重置为: {new_password}', 'success')
     return redirect(url_for('admin.teacher_list'))
+
+
+@bp.route('/teachers/<int:teacher_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def teacher_delete(teacher_id):
+    """删除教师"""
+    teacher = Teacher.query.get_or_404(teacher_id)
+
+    # 检查是否有课程关联
+    if teacher.courses:  # 直接检查列表是否为空
+        flash('无法删除该教师，因为已有课程关联', 'error')
+        return redirect(url_for('admin.teacher_list'))
+
+    # 检查是否有其他关联（比如成绩记录等）
+    # 根据您的业务逻辑添加其他检查
+
+    # 删除教师
+    db.session.delete(teacher)
+    db.session.commit()
+
+    flash(f'教师 "{teacher.username}" 已删除', 'success')
+    return redirect(url_for('admin.teacher_list'))
+
+
+@bp.route('/teachers/<int:teacher_id>/courses', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def teacher_courses(teacher_id):
+    """管理教师课程绑定"""
+    teacher = Teacher.query.get_or_404(teacher_id)
+    form = TeacherCourseForm()
+
+    # 设置表单的初始值
+    if request.method == 'GET':
+        form.course_ids.data = [course.id for course in teacher.courses]
+
+    if form.validate_on_submit():
+        try:
+            # 清除现有的课程绑定
+            teacher.courses.clear()
+
+            # 添加新的课程绑定
+            selected_courses = Course.query.filter(Course.id.in_(form.course_ids.data)).all()
+            teacher.courses.extend(selected_courses)
+
+            db.session.commit()
+            flash(f'教师 "{teacher.username}" 的课程绑定已更新', 'success')
+            return redirect(url_for('admin.teacher_edit', teacher_id=teacher_id))
+
+        except Exception as e:
+            db.session.rollback()
+            flash('课程绑定更新失败', 'error')
+
+    return render_template('admin/teachers/courses.html',
+                           form=form,
+                           teacher=teacher)
 
 
 # ==================== 学生管理 ====================

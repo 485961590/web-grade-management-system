@@ -1,10 +1,101 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "admin/base.html" %}
 
-</body>
-</html>
+{% block title %}编辑课程 - 成绩管理系统{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">编辑课程</h1>
+    <a href="{{ url_for('admin.course_list') }}" style="color: #1890ff; text-decoration: none;">返回列表</a>
+</div>
+
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 500px;">
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.course_code.label }}</label>
+            {{ form.course_code(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+            {% if form.course_code.errors %}
+            <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                {% for error in form.course_code.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.course_name.label }}</label>
+            {{ form.course_name(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+            {% if form.course_name.errors %}
+            <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                {% for error in form.course_name.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.credits.label }}</label>
+            {{ form.credits(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+            {% if form.credits.errors %}
+            <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                {% for error in form.credits.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.hours.label }}</label>
+            {{ form.hours(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+            {% if form.hours.errors %}
+            <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                {% for error in form.hours.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ form.description.label }}</label>
+            {{ form.description(style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize:
+            vertical;", rows="4") }}
+            {% if form.description.errors %}
+            <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                {% for error in form.description.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="submit"
+                    style="padding: 10px 20px; background: #1890ff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                更新课程
+            </button>
+            <a href="{{ url_for('admin.course_list') }}"
+               style="padding: 10px 20px; background: #f5f5f5; color: #333; text-decoration: none; border-radius: 4px;">
+                取消
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- 课程关联信息 -->
+{% if course.grades.count() > 0 %}
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 20px;">
+    <h3 style="margin: 0 0 15px 0; color: #333;">课程关联信息</h3>
+    <div style="color: #666;">
+        <p>该课程已有 <strong>{{ course.grades.count() }}</strong> 条成绩记录</p>
+        <p style="color: #ff4d4f; font-size: 14px;">
+            ⚠️ 注意：修改课程信息可能会影响相关的成绩记录
+        </p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

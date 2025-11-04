@@ -1,10 +1,169 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "admin/base.html" %}
 
-</body>
-</html>
+{% block title %}教师管理 - 成绩管理系统{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">教师管理</h1>
+    <a href="{{ url_for('admin.teacher_create') }}" class="action-btn" style="display: inline-block; padding: 8px 16px;">
+        添加教师
+    </a>
+</div>
+
+<!-- 搜索和筛选区域 -->
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+    <form method="GET" action="{{ url_for('admin.teacher_list') }}"
+          style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px;">
+            <input type="text" name="search" placeholder="搜索教师工号、姓名或院系"
+                   value="{{ request.args.get('search', '') }}"
+                   style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+
+        <!-- 院系筛选 -->
+        <div>
+            <select name="department" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <option value="">所有院系</option>
+                <option value="计算机学院" {% if request.args.get('department') == '计算机学院' %}selected{% endif %}>计算机学院</option>
+                <option value="数学学院" {% if request.args.get('department') == '数学学院' %}selected{% endif %}>数学学院</option>
+                <option value="物理学院" {% if request.args.get('department') == '物理学院' %}selected{% endif %}>物理学院</option>
+                <option value="外语学院" {% if request.args.get('department') == '外语学院' %}selected{% endif %}>外语学院</option>
+            </select>
+        </div>
+
+        <button type="submit"
+                style="padding: 8px 16px; background: #1890ff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            搜索
+        </button>
+
+        {% if request.args.get('search') or request.args.get('department') %}
+        <a href="{{ url_for('admin.teacher_list') }}"
+           style="padding: 8px 16px; background: #f5f5f5; color: #333; text-decoration: none; border-radius: 4px;">
+            重置
+        </a>
+        {% endif %}
+    </form>
+
+    <!-- 搜索结果显示 -->
+    {% if request.args.get('search') %}
+    <div style="margin-top: 10px; color: #666; font-size: 14px;">
+        <span>搜索关键词: "<strong>{{ request.args.get('search') }}</strong>"</span>
+        <span style="margin-left: 15px;">找到 <strong>{{ teachers.total }}</strong> 位教师</span>
+        {% if teachers.total > 0 %}
+        <span style="margin-left: 15px;">第 {{ teachers.page }} 页 / 共 {{ teachers.pages }} 页</span>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- 教师列表 -->
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    {% if teachers.items %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th>教师工号</th>
+            <th>姓名</th>
+            <th>院系</th>
+            <th>职称</th>
+            <th>联系方式</th>
+            <th>授课课程</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for teacher in teachers.items %}
+        <tr>
+            <td><strong>{{ teacher.teacher_id }}</strong></td>
+            <td>{{ teacher.username }}</td>
+            <td>{{ teacher.department or '未设置' }}</td>
+            <td>{{ teacher.title or '未设置' }}</td>
+            <td>
+                {% if teacher.email or teacher.phone %}
+                    <div>{{ teacher.email or '' }}</div>
+                    <div style="font-size: 12px; color: #666;">{{ teacher.phone or '' }}</div>
+                {% else %}
+                    <span style="color: #999;">未设置</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if teacher.courses %}
+                    <span class="badge badge-success">{{ teacher.courses|length }}门</span>
+                {% else %}
+                    <span style="color: #999;">未分配</span>
+                {% endif %}
+            </td>
+            <td>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <a href="{{ url_for('admin.teacher_edit', teacher_id=teacher.id) }}"
+                       style="color: #1890ff; text-decoration: none; font-size: 12px;">编辑</a>
+                    <form method="POST" action="{{ url_for('admin.teacher_reset_password', teacher_id=teacher.id) }}"
+                          style="display: inline;" onsubmit="return confirm('确定要重置教师【{{ teacher.username }}】的密码吗？');">
+                        <button type="submit" style="color: #52c41a; background: none; border: none; cursor: pointer; font-size: 12px;">
+                            重置密码
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ url_for('admin.teacher_delete', teacher_id=teacher.id) }}"
+                          style="display: inline;" onsubmit="return confirm('确定要删除教师【{{ teacher.username }}】吗？此操作不可恢复！');">
+                        <button type="submit" style="color: #ff4d4f; background: none; border: none; cursor: pointer; font-size: 12px;">
+                            🗑️ 删除
+                        </button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- 分页 -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+        <div style="color: #666; font-size: 14px;">
+            显示第 {{ (teachers.page - 1) * teachers.per_page + 1 }} -
+            {{ [teachers.page * teachers.per_page, teachers.total]|min }} 条，共 {{ teachers.total }} 条记录
+        </div>
+
+        <div style="display: flex; gap: 5px;">
+            {% if teachers.has_prev %}
+            <a href="{{ url_for('admin.teacher_list', page=teachers.prev_num, search=request.args.get('search', ''), department=request.args.get('department', '')) }}"
+               style="padding: 8px 12px; color: #1890ff; text-decoration: none; border: 1px solid #ddd; border-radius: 4px;">
+                ← 上一页
+            </a>
+            {% endif %}
+
+            {% for page_num in teachers.iter_pages(left_edge=2, left_current=2, right_current=2, right_edge=2) %}
+                {% if page_num %}
+                    {% if page_num == teachers.page %}
+                    <span style="padding: 8px 12px; background: #1890ff; color: white; border-radius: 4px;">{{ page_num }}</span>
+                    {% else %}
+                    <a href="{{ url_for('admin.teacher_list', page=page_num, search=request.args.get('search', ''), department=request.args.get('department', '')) }}"
+                       style="padding: 8px 12px; color: #1890ff; text-decoration: none; border: 1px solid #ddd; border-radius: 4px;">{{ page_num }}</a>
+                    {% endif %}
+                {% else %}
+                <span style="padding: 8px 12px; color: #999;">...</span>
+                {% endif %}
+            {% endfor %}
+
+            {% if teachers.has_next %}
+            <a href="{{ url_for('admin.teacher_list', page=teachers.next_num, search=request.args.get('search', ''), department=request.args.get('department', '')) }}"
+               style="padding: 8px 12px; color: #1890ff; text-decoration: none; border: 1px solid #ddd; border-radius: 4px;">
+                下一页 →
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 60px 20px; color: #999;">
+        {% if request.args.get('search') or request.args.get('department') %}
+        <div style="font-size: 48px; margin-bottom: 20px;">🔍</div>
+        <h3 style="margin: 0 0 10px 0; color: #666;">没有找到匹配的教师</h3>
+        <p>请尝试使用其他关键词搜索，或 <a href="{{ url_for('admin.teacher_list') }}" style="color: #1890ff;">查看所有教师</a></p>
+        {% else %}
+        <div style="font-size: 48px; margin-bottom: 20px;"></div>
+        <h3 style="margin: 0 0 10px 0; color: #666;">暂无教师数据</h3>
+        <p><a href="{{ url_for('admin.teacher_create') }}" style="color: #1890ff;">点击添加第一位教师</a></p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

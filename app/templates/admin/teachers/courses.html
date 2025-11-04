@@ -1,0 +1,96 @@
+{% extends "admin/base.html" %}
+
+{% block title %}管理教师课程 - 成绩管理系统{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">管理教师课程</h1>
+    <a href="{{ url_for('admin.teacher_edit', teacher_id=teacher.id) }}" style="color: #1890ff; text-decoration: none;">
+        ← 返回教师编辑
+    </a>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <!-- 课程绑定表单 -->
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0 0 20px 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+            课程绑定
+        </h3>
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold;">
+                    {{ form.course_ids.label }}
+                </label>
+                {{ form.course_ids(style="width: 100%; height: 200px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;") }}
+                {% if form.course_ids.errors %}
+                    <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                        {% for error in form.course_ids.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                    按住 Ctrl 键可多选课程
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" style="padding: 10px 20px; background: #1890ff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    更新课程绑定
+                </button>
+                <a href="{{ url_for('admin.teacher_edit', teacher_id=teacher.id) }}"
+                   style="padding: 10px 20px; background: #f5f5f5; color: #333; text-decoration: none; border-radius: 4px;">
+                    取消
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- 教师信息 -->
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="margin: 0 0 20px 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+            教师信息
+        </h3>
+
+        <div style="margin-bottom: 20px;">
+            <div style="display: grid; grid-template-columns: 80px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>工号:</strong>
+                <span>{{ teacher.teacher_id }}</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 80px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>姓名:</strong>
+                <span>{{ teacher.username }}</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 80px 1fr; gap: 10px; margin-bottom: 10px;">
+                <strong>院系:</strong>
+                <span>{{ teacher.department or '未设置' }}</span>
+            </div>
+        </div>
+
+        <!-- 当前授课课程 -->
+        <div>
+            <h4 style="margin: 0 0 10px 0; color: #333;">当前授课课程</h4>
+            {% if teacher.courses %}
+                <div style="max-height: 300px; overflow-y: auto;">
+                    {% for course in teacher.courses %}
+                    <div style="background: #f6ffed; border: 1px solid #b7eb8f; padding: 10px; margin-bottom: 8px; border-radius: 4px;">
+                        <div style="font-weight: bold; color: #389e0d;">{{ course.course_code }}</div>
+                        <div style="color: #666; font-size: 14px;">{{ course.course_name }}</div>
+                        <div style="color: #999; font-size: 12px;">
+                            学分: {{ course.credits }} | 学时: {{ course.hours }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="color: #999; font-style: italic; text-align: center; padding: 20px;">
+                    暂无授课课程
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

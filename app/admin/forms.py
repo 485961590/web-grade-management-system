@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, IntegerField, TextAreaField, SelectField
+from wtforms import StringField, SubmitField, IntegerField, TextAreaField, SelectField, SelectMultipleField
 from wtforms.validators import DataRequired, Length, NumberRange, Optional
-from app.models import Class
+from app.models import Class, Course
 
 
 class CourseForm(FlaskForm):
@@ -40,3 +40,15 @@ class StudentForm(FlaskForm):
         # 动态加载班级选项
         self.class_id.choices = [(c.id, f"{c.class_name} ({c.class_code})")
                                  for c in Class.query.order_by(Class.class_name).all()]
+
+
+class TeacherCourseForm(FlaskForm):
+    """教师课程绑定表单"""
+    course_ids = SelectMultipleField('选择课程', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('绑定课程')
+
+    def __init__(self, *args, **kwargs):
+        super(TeacherCourseForm, self).__init__(*args, **kwargs)  # 这里要改为 TeacherCourseForm
+        # 动态加载课程选项
+        self.course_ids.choices = [(c.id, f"{c.course_code} - {c.course_name}")
+                                   for c in Course.query.order_by(Course.course_code).all()]
