@@ -1,7 +1,7 @@
 # app/auth.py
 from flask import render_template, redirect, url_for, flash, request, Blueprint
 from flask_login import login_user, logout_user, login_required, current_user
-from app.models import db, User
+from app.models import db, User, RoleType
 from app.forms import LoginForm, ChangePasswordForm, ProfileForm
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -15,7 +15,7 @@ def index():
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:  # current_user.is_authenticated 来自 Flask-Login 的 UserMixin 类用于验证用户是否已认证（已登录）
+    if current_user.is_authenticated:
         return redirect(url_for('auth.index'))
 
     form = LoginForm()
@@ -23,10 +23,18 @@ def login():
         user = User.query.filter_by(username=form.username.data).first()
 
         if user and user.check_password(form.password.data):
-            login_user(user)
+            # 移除 remember_me 参数，使用默认值
+            login_user(user)  # 改为这样
             flash('登录成功！', 'success')
             next_page = request.args.get('next')
-            return redirect(next_page or url_for('auth.index'))
+
+            # 基于角色的重定向
+            if user.role == RoleType.ADMIN:
+                return redirect(next_page or url_for('admin.dashboard'))
+            elif user.role == RoleType.TEACHER:
+                return redirect(next_page or url_for('teacher.dashboard'))
+            else:
+                return redirect(next_page or url_for('auth.index'))
         else:
             flash('用户名或密码错误', 'error')
 

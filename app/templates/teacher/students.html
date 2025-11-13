@@ -1,0 +1,105 @@
+{% extends "teacher/base.html" %}
+
+{% block title %}学生查询{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: between; align-items: center; margin-bottom: 30px;">
+    <h1 style="color: #333;">学生查询</h1>
+    <a href="{{ url_for('teacher.dashboard') }}" style="color: #666; text-decoration: none;">← 返回首页</a>
+</div>
+
+<!-- 搜索栏 -->
+<div class="card">
+    <form method="GET" style="display: flex; gap: 10px; align-items: end;">
+        <div style="flex: 1;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 500;">搜索学生</label>
+            <input type="text" name="search" placeholder="输入学号或姓名" value="{{ search }}"
+                   style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div>
+            <button type="submit" class="btn">搜索</button>
+            {% if search %}
+            <a href="{{ url_for('teacher.students') }}" class="btn" style="background: #666; margin-left: 5px;">重置</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- 学生列表 -->
+<div class="card">
+    {% if students.items %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>学号</th>
+                <th>姓名</th>
+                <th>班级</th>
+                <th>专业</th>
+                <th>成绩记录</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students.items %}
+            <tr>
+                <td><strong>{{ student.student_id }}</strong></td>
+                <td>{{ student.username }}</td>
+                <td>
+                    {% if student.class_ %}
+                        {{ student.class_.class_name }}
+                    {% else %}
+                        <span style="color: #999;">未分配</span>
+                    {% endif %}
+                </td>
+                <td>{{ student.major or '未设置' }}</td>
+                <td>
+                    {% set student_grades = student.grades.filter_by(teacher_id=current_user.id).count() %}
+                    {% if student_grades > 0 %}
+                        <span class="badge badge-success">{{ student_grades }}条</span>
+                    {% else %}
+                        <span style="color: #999;">无记录</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div style="display: flex; gap: 10px;">
+                        <a href="{{ url_for('teacher.grades') }}?search={{ student.student_id }}"
+                           style="color: #1890ff; text-decoration: none; font-size: 12px;">查看成绩</a>
+                        <a href="{{ url_for('teacher.create_grade') }}?student_id={{ student.id }}"
+                           style="color: #52c41a; text-decoration: none; font-size: 12px;">录入成绩</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- 分页 -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+        <div style="color: #666; font-size: 14px;">
+            第 {{ students.page }} 页，共 {{ students.pages }} 页
+        </div>
+        <div style="display: flex; gap: 5px;">
+            {% if students.has_prev %}
+            <a href="{{ url_for('teacher.students', page=students.prev_num, search=search) }}"
+               class="btn" style="padding: 6px 12px;">← 上一页</a>
+            {% endif %}
+
+            {% if students.has_next %}
+            <a href="{{ url_for('teacher.students', page=students.next_num, search=search) }}"
+               class="btn" style="padding: 6px 12px;">下一页 →</a>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 60px 20px; color: #999;">
+        <div style="font-size: 64px; margin-bottom: 20px;"></div>
+        <h3 style="margin: 0 0 10px 0; color: #666;">
+            {% if search %}没有找到匹配的学生{% else %}暂无学生数据{% endif %}
+        </h3>
+        {% if not search %}
+        <p style="margin-bottom: 20px;">系统中共有 {{ students.total }} 名学生</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

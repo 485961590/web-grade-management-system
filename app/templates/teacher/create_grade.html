@@ -1,0 +1,83 @@
+{% extends "teacher/base.html" %}
+
+{% block title %}录入成绩{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 30px;">
+        <h1 style="color: #333;">录入成绩</h1>
+        <a href="{{ url_for('teacher.grades') }}" style="color: #666; text-decoration: none;">← 返回列表</a>
+    </div>
+
+    <div class="card">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500;">{{ form.student_id.label }}</label>
+                {{ form.student_id(style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;") }}
+                {% if form.student_id.errors %}
+                <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                    {{ form.student_id.errors[0] }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500;">{{ form.course_id.label }}</label>
+                {{ form.course_id(style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;") }}
+                {% if form.course_id.errors %}
+                <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                    {{ form.course_id.errors[0] }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">{{ form.score.label }}</label>
+                    {{ form.score(style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;", placeholder="0-100") }}
+                    {% if form.score.errors %}
+                    <div style="color: #ff4d4f; font-size: 12px; margin-top: 5px;">
+                        {{ form.score.errors[0] }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">{{ form.semester.label }}</label>
+                    {{ form.semester(style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;") }}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">{{ form.academic_year.label }}</label>
+                    {{ form.academic_year(style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;") }}
+                </div>
+
+                <div style="display: flex; align-items: center; margin-top: 25px;">
+                    {{ form.is_makeup(style="margin-right: 8px;") }}
+                    <label style="font-weight: 500;">{{ form.is_makeup.label }}</label>
+                </div>
+            </div>
+
+            <div style="background: #f6ffed; padding: 15px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #b7eb8f;">
+                <div style="color: #389e0d; font-size: 14px;">
+                    <strong>成绩等级：</strong>
+                    <span style="color: #52c41a;">90-100优秀</span> ·
+                    <span style="color: #1890ff;">80-89良好</span> ·
+                    <span style="color: #fa8c16;">70-79中等</span> ·
+                    <span style="color: #722ed1;">60-69及格</span> ·
+                    <span style="color: #ff4d4f;">0-59不及格</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn" style="padding: 12px 24px;">保存成绩</button>
+                <a href="{{ url_for('teacher.grades') }}" class="btn" style="background: #666; padding: 12px 24px;">取消</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

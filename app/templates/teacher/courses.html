@@ -1,0 +1,52 @@
+{% extends "teacher/base.html" %}
+
+{% block title %}我的课程{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: between; align-items: center; margin-bottom: 30px;">
+    <h1 style="color: #333;">我的授课课程</h1>
+    <a href="{{ url_for('teacher.dashboard') }}" style="color: #666; text-decoration: none;">← 返回首页</a>
+</div>
+
+{% if courses %}
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+    {% for course in courses %}
+    <div class="card" style="transition: transform 0.2s;">
+        <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 15px;">
+            <div>
+                <h3 style="margin: 0 0 5px 0; color: #333;">{{ course.course_name }}</h3>
+                <div style="color: #666; font-size: 14px;">{{ course.course_code }}</div>
+            </div>
+            <span class="badge" style="background: #f6ffed; color: #52c41a;">
+                {{ course.credits }}学分
+            </span>
+        </div>
+
+        <div style="color: #666; margin-bottom: 15px;">
+            <div style="margin-bottom: 5px;">学时: {{ course.hours }}</div>
+            {% if course.description %}
+            <div style="font-size: 14px; line-height: 1.4;">{{ course.description }}</div>
+            {% endif %}
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <a href="{{ url_for('teacher.create_grade') }}?course_id={{ course.id }}"
+               class="btn" style="font-size: 14px;">
+                录入成绩
+            </a>
+            <a href="{{ url_for('teacher.grades') }}?course_id={{ course.id }}"
+               style="padding: 8px 16px; border: 1px solid #1890ff; color: #1890ff; text-decoration: none; border-radius: 4px; font-size: 14px;">
+                查看成绩
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card" style="text-align: center; padding: 60px 20px;">
+    <div style="font-size: 64px; margin-bottom: 20px;"></div>
+    <h3 style="margin: 0 0 10px 0; color: #666;">暂无授课课程</h3>
+    <p style="color: #999; margin-bottom: 20px;">请联系管理员为您分配课程</p>
+</div>
+{% endif %}
+{% endblock %}

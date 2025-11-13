@@ -1,0 +1,101 @@
+{% extends "teacher/base.html" %}
+
+{% block title %}教师工作台{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 30px;">
+    <h1 style="color: #333; margin-bottom: 10px;">教师工作台</h1>
+    <p style="color: #666;">欢迎，{{ current_user.username }}老师</p>
+</div>
+
+<!-- 统计卡片 -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div>授课课程</div>
+        <div class="stat-number">{{ total_courses }}</div>
+        <a href="{{ url_for('teacher.courses') }}" style="color: #1890ff; text-decoration: none; font-size: 14px;">
+            查看课程 ›
+        </a>
+    </div>
+
+    <div class="stat-card">
+        <div>成绩记录</div>
+        <div class="stat-number">{{ total_grades }}</div>
+        <a href="{{ url_for('teacher.grades') }}" style="color: #1890ff; text-decoration: none; font-size: 14px;">
+            管理成绩 ›
+        </a>
+    </div>
+</div>
+
+<!-- 快速操作 -->
+<div class="card">
+    <h3 style="margin-bottom: 15px; color: #333;">快速操作</h3>
+    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <a href="{{ url_for('teacher.create_grade') }}" class="btn">录入成绩</a>
+        <a href="{{ url_for('teacher.courses') }}" class="btn" style="background: #52c41a;">查看课程</a>
+        <a href="{{ url_for('teacher.students') }}" class="btn" style="background: #722ed1;">学生查询</a>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <!-- 最近成绩 -->
+    <div class="card">
+        <h3 style="margin-bottom: 15px; color: #333;">最近录入的成绩</h3>
+
+        {% if recent_grades %}
+        <div style="max-height: 300px; overflow-y: auto;">
+            {% for grade in recent_grades %}
+            <div style="padding: 12px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-weight: 500;">{{ grade.student.username }}</div>
+                    <div style="font-size: 12px; color: #666;">
+                        {{ grade.course.course_name }} · {{ grade.semester }}
+                    </div>
+                </div>
+                <span class="badge {% if grade.score >= 90 %}badge-success{% elif grade.score >= 60 %}badge-warning{% else %}badge-danger{% endif %}">
+                    {{ grade.score }}分
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 40px; color: #999;">
+            <div style="font-size: 48px; margin-bottom: 10px;"></div>
+            <p>暂无成绩记录</p>
+            <a href="{{ url_for('teacher.create_grade') }}" class="btn" style="margin-top: 10px;">开始录入</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 课程统计 -->
+    <div class="card">
+        <h3 style="margin-bottom: 15px; color: #333;">课程成绩统计</h3>
+
+        {% if course_stats %}
+        <div style="max-height: 300px; overflow-y: auto;">
+            {% for stat in course_stats %}
+            <div style="padding: 12px; border-bottom: 1px solid #f0f0f0;">
+                <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 5px;">
+                    <div style="font-weight: 500;">{{ stat.course.course_name }}</div>
+                    <span class="badge" style="background: #e6f7ff; color: #1890ff;">
+                        {{ stat.count }}条记录
+                    </span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666;">
+                    <span>平均分: {{ stat.avg_score }}</span>
+                    <a href="{{ url_for('teacher.grades') }}?course_id={{ stat.course.id }}" style="color: #1890ff;">
+                        查看详情 ›
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 40px; color: #999;">
+            <div style="font-size: 48px; margin-bottom: 10px;"></div>
+            <p>暂无课程数据</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
