@@ -23,8 +23,7 @@ def login():
         user = User.query.filter_by(username=form.username.data).first()
 
         if user and user.check_password(form.password.data):
-            # 移除 remember_me 参数，使用默认值
-            login_user(user)  # 改为这样
+            login_user(user)
             flash('登录成功！', 'success')
             next_page = request.args.get('next')
 
@@ -33,6 +32,8 @@ def login():
                 return redirect(next_page or url_for('admin.dashboard'))
             elif user.role == RoleType.TEACHER:
                 return redirect(next_page or url_for('teacher.dashboard'))
+            elif user.role == RoleType.STUDENT:  # 新增学生重定向
+                return redirect(next_page or url_for('student.grades'))
             else:
                 return redirect(next_page or url_for('auth.index'))
         else:

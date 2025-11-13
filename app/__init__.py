@@ -53,4 +53,6 @@ def create_app():
     app.register_blueprint(admin_bp)
     from app.teacher.routes import bp as teacher_bp  # 导入教师蓝图
     app.register_blueprint(teacher_bp)
+    from app.student.routes import bp as student_bp  # 导入学生蓝图
+    app.register_blueprint(student_bp)
     return app

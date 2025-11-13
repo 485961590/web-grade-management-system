@@ -12,63 +12,76 @@
         </div>
 
         {% if current_user.role.value == 'admin' %}
-            <h3 style="color: #333; margin-bottom: 15px;">管理员功能</h3>
-            <div style="display: grid; gap: 10px;">
-                <a href="{{ url_for('admin.dashboard') }}" style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #1890ff;">
-                    管理员面板
-                </a>
-                <a href="{{ url_for('admin.teacher_list') }}" style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #52c41a;">
-                    管理教师账户
-                </a>
-                <a href="{{ url_for('admin.student_list') }}" style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #faad14;">
-                    管理学生账户
-                </a>
-                <a href="{{ url_for('admin.course_list') }}" style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #f5222d;">
-                    管理课程信息
-                </a>
-                <a href="{{ url_for('admin.grade_list') }}" style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #722ed1;">
-                    管理全部成绩
-                </a>
-            </div>
+        <h3 style="color: #333; margin-bottom: 15px;">管理员功能</h3>
+        <div style="display: grid; gap: 10px;">
+            <a href="{{ url_for('admin.dashboard') }}"
+               style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #1890ff;">
+                管理员面板
+            </a>
+            <a href="{{ url_for('admin.teacher_list') }}"
+               style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #52c41a;">
+                管理教师账户
+            </a>
+            <a href="{{ url_for('admin.student_list') }}"
+               style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #faad14;">
+                管理学生账户
+            </a>
+            <a href="{{ url_for('admin.course_list') }}"
+               style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #f5222d;">
+                管理课程信息
+            </a>
+            <a href="{{ url_for('admin.grade_list') }}"
+               style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #722ed1;">
+                管理全部成绩
+            </a>
+        </div>
 
         {% elif current_user.role.value == 'teacher' %}
-            <h3 style="color: #333; margin-bottom: 15px;">教师功能</h3>
-            <div style="display: grid; gap: 10px;">
-                <a href="{{ url_for('teacher.create_grade') }}" style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #1890ff;">
-                    录入课程成绩
-                </a>
-                <a href="{{ url_for('teacher.grades') }}" style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #52c41a;">
-                    查询所授课程成绩
-                </a>
-                <a href="{{ url_for('teacher.courses') }}" style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #faad14;">
-                    查看我的课程
-                </a>
-                <a href="{{ url_for('teacher.students') }}" style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #f5222d;">
-                    学生查询
-                </a>
-            </div>
+        <h3 style="color: #333; margin-bottom: 15px;">教师功能</h3>
+        <div style="display: grid; gap: 10px;">
+            <a href="{{ url_for('teacher.create_grade') }}"
+               style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #1890ff;">
+                录入课程成绩
+            </a>
+            <a href="{{ url_for('teacher.grades') }}"
+               style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #52c41a;">
+                查询所授课程成绩
+            </a>
+            <a href="{{ url_for('teacher.courses') }}"
+               style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #faad14;">
+                查看我的课程
+            </a>
+            <a href="{{ url_for('teacher.students') }}"
+               style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #f5222d;">
+                学生查询
+            </a>
+        </div>
 
         {% elif current_user.role.value == 'student' %}
-            <h3 style="color: #333; margin-bottom: 15px;">学生功能</h3>
-            <div style="display: grid; gap: 10px;">
-                <div style="padding: 12px 15px; background: #f8f9fa; border-radius: 6px; color: #666; border-left: 4px solid #1890ff;">
-                    查询个人成绩（学生模块开发中）
-                </div>
-            </div>
+        <h3 style="color: #333; margin-bottom: 15px;">学生功能</h3>
+        <div style="display: grid; gap: 10px;">
+            <a href="{{ url_for('student.grades') }}"
+               style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #1890ff;">
+                查看我的成绩
+            </a>
+        </div>
 
         {% elif current_user.role.value == 'class_teacher' %}
-            <h3 style="color: #333; margin-bottom: 15px;">班主任功能</h3>
-            <div style="display: grid; gap: 10px;">
-                <a href="{{ url_for('teacher.students') }}" style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #1890ff;">
-                    查询班级学生
-                </a>
-                <a href="{{ url_for('teacher.grades') }}" style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #52c41a;">
-                    查看班级成绩
-                </a>
-                <a href="{{ url_for('teacher.dashboard') }}" style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #faad14;">
-                    教师面板
-                </a>
-            </div>
+        <h3 style="color: #333; margin-bottom: 15px;">班主任功能</h3>
+        <div style="display: grid; gap: 10px;">
+            <a href="{{ url_for('teacher.students') }}"
+               style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #1890ff;">
+                查询班级学生
+            </a>
+            <a href="{{ url_for('teacher.grades') }}"
+               style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #52c41a;">
+                查看班级成绩
+            </a>
+            <a href="{{ url_for('teacher.dashboard') }}"
+               style="display: block; padding: 12px 15px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border-left: 4px solid #faad14;">
+                教师面板
+            </a>
+        </div>
         {% endif %}
     </div>
 </div>

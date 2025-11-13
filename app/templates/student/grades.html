@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的成绩 - 成绩管理系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            padding: 20px;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .header p {
+            color: #666;
+        }
+        .nav {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .nav a {
+            color: #666;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            background: #f5f5f5;
+        }
+        .nav a:hover {
+            background: #e6f7ff;
+            color: #1890ff;
+        }
+        .search-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .search-form {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 10px;
+            align-items: end;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+        input, select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .btn {
+            padding: 8px 16px;
+            background: #1890ff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .btn:hover { background: #40a9ff; }
+        .btn-secondary {
+            background: #666;
+        }
+        .btn-secondary:hover { background: #777; }
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .table th {
+            background: #fafafa;
+            font-weight: 600;
+            color: #333;
+        }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .badge-success { background: #f6ffed; color: #52c41a; }
+        .badge-warning { background: #fff7e6; color: #fa8c16; }
+        .badge-danger { background: #fff2f0; color: #ff4d4f; }
+        .alert {
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .alert-success { background: #f6ffed; border: 1px solid #b7eb8f; color: #52c41a; }
+        .alert-error { background: #fff2f0; border: 1px solid #ffccc7; color: #ff4d4f; }
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .pagination-info {
+            color: #666;
+            font-size: 14px;
+        }
+        .pagination-links {
+            display: flex;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部 -->
+    <div class="header">
+        <h1>我的成绩</h1>
+        <p>学生：{{ current_user.username }} ({{ current_user.student_id }})</p>
+        <div class="nav">
+            <a href="{{ url_for('auth.index') }}">← 返回首页</a>
+            <a href="{{ url_for('auth.logout') }}">退出登录</a>
+        </div>
+    </div>
+
+    <!-- 消息提示 -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'error' if category == 'error' else 'success' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- 搜索栏 -->
+    <div class="search-box">
+        <form method="GET" class="search-form">
+            <div class="form-group">
+                <label>搜索课程</label>
+                <input type="text" name="course_search" placeholder="课程名称或代码" value="{{ course_search }}">
+            </div>
+
+            <div class="form-group">
+                <label>学期筛选</label>
+                <select name="semester_filter">
+                    <option value="">所有学期</option>
+                    <option value="2024-2025-1" {% if semester_filter == '2024-2025-1' %}selected{% endif %}>2024-2025-1</option>
+                    <option value="2024-2025-2" {% if semester_filter == '2024-2025-2' %}selected{% endif %}>2024-2025-2</option>
+                    <option value="2023-2024-1" {% if semester_filter == '2023-2024-1' %}selected{% endif %}>2023-2024-1</option>
+                    <option value="2023-2024-2" {% if semester_filter == '2023-2024-2' %}selected{% endif %}>2023-2024-2</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn">搜索</button>
+
+            {% if course_search or semester_filter %}
+            <a href="{{ url_for('student.grades') }}" class="btn btn-secondary">重置</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- 成绩列表 -->
+    <div class="card">
+        {% if grades.items %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>课程名称</th>
+                    <th>课程代码</th>
+                    <th>成绩</th>
+                    <th>学期</th>
+                    <th>授课教师</th>
+                    <th>录入时间</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for grade in grades.items %}
+                <tr>
+                    <td>{{ grade.course.course_name }}</td>
+                    <td>{{ grade.course.course_code }}</td>
+                    <td>
+                        <span class="badge {% if grade.score >= 90 %}badge-success{% elif grade.score >= 60 %}badge-warning{% else %}badge-danger{% endif %}">
+                            {{ grade.score }}
+                            {% if grade.is_makeup %}(补考){% endif %}
+                        </span>
+                    </td>
+                    <td>{{ grade.semester }}</td>
+                    <td>{{ grade.teacher.username }}</td>
+                    <td>{{ grade.created_at.strftime('%Y-%m-%d') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- 分页 -->
+        <div class="pagination">
+            <div class="pagination-info">
+                第 {{ grades.page }} 页，共 {{ grades.pages }} 页
+            </div>
+            <div class="pagination-links">
+                {% if grades.has_prev %}
+                <a href="{{ url_for('student.grades', page=grades.prev_num, course_search=course_search, semester_filter=semester_filter) }}" class="btn">
+                    ← 上一页
+                </a>
+                {% endif %}
+
+                {% if grades.has_next %}
+                <a href="{{ url_for('student.grades', page=grades.next_num, course_search=course_search, semester_filter=semester_filter) }}" class="btn">
+                    下一页 →
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 60px 20px; color: #999;">
+            <div style="font-size: 64px; margin-bottom: 20px;">📊</div>
+            <h3 style="margin: 0 0 10px 0; color: #666;">
+                {% if course_search or semester_filter %}没有找到匹配的成绩记录{% else %}暂无成绩记录{% endif %}
+            </h3>
+            {% if course_search or semester_filter %}
+            <p>请尝试其他搜索条件</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
