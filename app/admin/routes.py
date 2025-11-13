@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import render_template, redirect, url_for, flash, request, Blueprint
 from flask_login import login_required, current_user
 from sqlalchemy import or_
@@ -14,6 +16,7 @@ bp = Blueprint('admin', __name__, url_prefix='/admin')
 @admin_required
 def dashboard():
     """管理员仪表板"""
+    login_time = datetime.now()
     # 获取统计数据
     stats = {
         'total_courses': Course.query.count(),
@@ -23,7 +26,7 @@ def dashboard():
         'total_grades': Grade.query.count(),
         'recent_grades': Grade.query.order_by(Grade.created_at.desc()).limit(10).all()
     }
-    return render_template('admin/dashboard.html', stats=stats)
+    return render_template('admin/dashboard.html', stats=stats, login_time=login_time)
 
 
 # ==================== 课程管理 ====================

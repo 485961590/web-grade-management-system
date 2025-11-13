@@ -32,7 +32,7 @@ def login():
                 return redirect(next_page or url_for('admin.dashboard'))
             elif user.role == RoleType.TEACHER:
                 return redirect(next_page or url_for('teacher.dashboard'))
-            elif user.role == RoleType.STUDENT:  # 新增学生重定向
+            elif user.role == RoleType.STUDENT:
                 return redirect(next_page or url_for('student.grades'))
             else:
                 return redirect(next_page or url_for('auth.index'))
